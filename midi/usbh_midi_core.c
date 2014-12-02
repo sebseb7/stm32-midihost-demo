@@ -282,6 +282,7 @@ static USBH_Status USBH_MIDI_Handle(USB_OTG_CORE_HANDLE *pdev ,
 					int i = 1;
 					while((i < USBH_MIDI_MPS_SIZE) && (MIDI_Machine.buff[i] != 0))
 					{
+						// do nothing with the received packet, if it is a button just send it back, to control the LEDs
 						if(MIDI_Machine.buff[2] > 23)
 						{
 							uint8_t next = ((send_buffer.write + 1) & SEND_BUFFER_MASK);
