@@ -18,10 +18,11 @@ NAME=st-flash
 all: $(NAME)
 
 $(NAME): $(OBJS) ../libstlink.a
-	$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LDFLAGS)
+	@echo "bulding ${NAME}"
+	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LDFLAGS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+	@$(CC) $(CFLAGS) -c $^ -o $@
 
 clean:
 	rm -f $(OBJS)

@@ -22,12 +22,12 @@ all:  $(LIBRARY) flash
 
 $(LIBRARY): $(OBJS_LIB)
 	@echo "objs are $(OBJS_LIB)"
-	$(AR) -cr $@ $^
+	@$(AR) -cr $@ $^
 	@echo "done making library"
 	
 %.o: %.c
 	@echo "building $^ into $@"
-	$(CC) $(CFLAGS) -c $^ -o $@
+	@$(CC) $(CFLAGS) -c $^ -o $@
 	@echo "done compiling"
 
 clean:
@@ -36,6 +36,7 @@ clean:
 	$(MAKE) -C flash clean
 	
 flash:
-	$(MAKE) -C flash
+	@$(MAKE) -C flash
+
 
 .PHONY: clean all flash 

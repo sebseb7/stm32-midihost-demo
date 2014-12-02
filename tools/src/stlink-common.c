@@ -141,11 +141,11 @@ static uint32_t __attribute__((unused)) read_flash_rdp(stlink_t *sl) {
     return stlink_read_debug32(sl, FLASH_WRPR) & 0xff;
 }
 
-static inline uint32_t read_flash_wrpr(stlink_t *sl) {
+__attribute__((unused)) static inline uint32_t read_flash_wrpr(stlink_t *sl) {
     return stlink_read_debug32(sl, FLASH_WRPR);
 }
 
-static inline uint32_t read_flash_obr(stlink_t *sl) {
+__attribute__((unused)) static inline uint32_t read_flash_obr(stlink_t *sl) {
     return stlink_read_debug32(sl, FLASH_OBR);
 }
 
@@ -278,7 +278,7 @@ static void set_flash_cr_strt(stlink_t *sl) {
     }
 }
 
-static inline uint32_t read_flash_acr(stlink_t *sl) {
+__attribute__((unused)) static inline uint32_t read_flash_acr(stlink_t *sl) {
     return stlink_read_debug32(sl, FLASH_ACR);
 }
 
