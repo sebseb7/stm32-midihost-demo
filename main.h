@@ -19,5 +19,4 @@
 void USB_Host_Handle(void);
 void TimingDelay_Decrement(void);
 void delay_ms(__IO uint32_t nTime);
-void Midi_Received_Callback(mios32_midi_package_t package);
 #endif

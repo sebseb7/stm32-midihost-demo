@@ -277,9 +277,7 @@ static USBH_Status USBH_MIDI_Handle(USB_OTG_CORE_HANDLE *pdev ,
 				if(HCD_GetURB_State(pdev , MIDI_Machine.hc_num_in) == URB_IDLE)
 				{
 				}
-
-
-				if(HCD_GetURB_State(pdev , MIDI_Machine.hc_num_in) == URB_DONE)
+				else if(HCD_GetURB_State(pdev , MIDI_Machine.hc_num_in) == URB_DONE)
 				{
 					int i = 1;
 					while((i < USBH_MIDI_MPS_SIZE) && (MIDI_Machine.buff[i] != 0))
