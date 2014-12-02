@@ -16,6 +16,7 @@ endif
 SRC=$(wildcard  *.c usb/*.c midi/*.c libs/*.c) \
 	core/startup_stm32f4xx.c \
 	core/stm32fxxx_it.c \
+	core/syscalls.c \
 	core/system_stm32f$(STM32F)xx.c 
 
 #ASRC=core/startup_stm32f$(STM32F)xx.s

@@ -73,7 +73,6 @@ void USBH_USR_DeviceAttached(void)
 void USBH_USR_UnrecoveredError (void)
 {
 	STM_EVAL_LEDOff(LED_Green);
-	STM_EVAL_LEDOff(LED_Red);
 	//LCD_ErrLog((void*)MSG_UNREC_ERROR);
 }
 

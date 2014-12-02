@@ -41,7 +41,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------*/
-extern USB_OTG_CORE_HANDLE          USB_OTG_dev;
+extern USB_OTG_CORE_HANDLE          USB_OTG_Core_dev;
 extern USBH_HOST                    USB_Host;
 extern bool							demoMode;
 
@@ -185,14 +185,12 @@ void TIM2_IRQHandler(void)
   * @retval None
   */
 #ifdef USE_USB_OTG_FS
-#warning fs
 void OTG_FS_IRQHandler(void)
 #else
-#warning hs
 void OTG_HS_IRQHandler(void)
 #endif
 {
-  USBH_OTG_ISR_Handler(&USB_OTG_dev);
+  USBH_OTG_ISR_Handler(&USB_OTG_Core_dev);
 }
 
 /**
@@ -206,7 +204,6 @@ void SysTick_Handler(void)
   TimingDelay_Decrement();
   USB_Host_Handle();
   update_temporized_LED(LED_Blue);
-  update_temporized_LED2(LED_Red);
 }
 
 

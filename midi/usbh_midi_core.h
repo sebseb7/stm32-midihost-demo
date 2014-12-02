@@ -22,7 +22,6 @@
 #include "usbh_ioreq.h"
 #include "usbh_hcs.h"
 #include "usbh_usr.h"
-#include "midi_interface.h"
 
 //#define MIDI_MIN_POLL          10
 
@@ -30,10 +29,7 @@
 /* States for MIDI State Machine */
 typedef enum
 {
-	MIDI_IDLE= 0,
-	MIDI_SEND_DATA,
-	MIDI_BUSY,
-	MIDI_GET_DATA,
+	MIDI_DATA=0,
 	MIDI_POLL,
 	MIDI_ERROR
 }
@@ -51,7 +47,8 @@ MIDI_cb_t;
 /* Structure for MIDI process */
 typedef struct _MIDI_Process
 {
-	MIDI_State_t	state;
+	MIDI_State_t	state_out;
+	MIDI_State_t	state_in;
 	uint8_t			buff[USBH_MIDI_MPS_SIZE];
 	uint8_t			hc_num_in;
 	uint8_t 		hc_num_out;
@@ -98,67 +95,9 @@ MIDI_EventPacket_t;
 /******************************************************************************/
 extern USBH_Class_cb_TypeDef  MIDI_cb;
 
-uint8_t MIDI_RcvData(uint8_t *outBuf);
-void MIDI_send(USB_OTG_CORE_HANDLE *pdev);
+void MIDI_send(uint8_t by1,uint8_t by2, uint8_t by3);
 
-typedef enum {
-  NoteOff       = 0x8,
-  NoteOn        = 0x9,
-  PolyPressure  = 0xa,
-  CC            = 0xb,
-  ProgramChange = 0xc,
-  Aftertouch    = 0xd,
-  PitchBend     = 0xe
-} mios32_midi_event_t;
 
-typedef union {
-  struct {
-    u32 ALL;
-  };
-  struct {
-    u8 cin_cable;
-    u8 evnt0;
-    u8 evnt1;
-    u8 evnt2;
-  };
-  struct {
-    u8 type:4;
-    u8 cable:4;
-    u8 chn:4; // mios32_midi_chn_t
-    u8 event:4; // mios32_midi_event_t
-    u8 value1;
-    u8 value2;
-  };
-
-  // C++ doesn't allow to redefine names in anonymous unions
-  // as a simple workaround, we rename these redundant names
-  struct {
-    u8 cin:4;
-    u8 dummy1_cable:4;
-    u8 dummy1_chn:4; // mios32_midi_chn_t 
-    u8 dummy1_event:4; // mios32_midi_event_t 
-    u8 note:8;
-    u8 velocity:8;
-  };
-  struct {
-    u8 dummy2_cin:4;
-    u8 dummy2_cable:4;
-    u8 dummy2_chn:4; // mios32_midi_chn_t 
-    u8 dummy2_event:4; // mios32_midi_event_t 
-    u8 cc_number:8;
-    u8 value:8;
-  };
-  struct {
-    u8 dummy3_cin:4;
-    u8 dummy3_cable:4;
-    u8 dummy3_chn:4; // mios32_midi_chn_t 
-    u8 dummy3_event:4; // mios32_midi_event_t
-    u8 program_change:8;
-    u8 dummy3:8;
-  };
-} mios32_midi_package_t;
-
-s32 USB_MIDI_PackageSend_NonBlocking(mios32_midi_package_t package);
 
 #endif /* __USBH_MIDI_CORE_H */
 
