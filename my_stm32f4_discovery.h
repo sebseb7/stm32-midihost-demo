@@ -134,8 +134,6 @@ uint32_t STM_EVAL_PBGetState(Button_TypeDef Button);
 
 void start_LED_On(Led_TypeDef Led, uint32_t duration);
 void update_temporized_LED(Led_TypeDef Led);
-void start_LED_On2(Led_TypeDef Led, uint32_t duration);
-void update_temporized_LED2(Led_TypeDef Led);
 void DebounceUserButton(void);
 
 /**

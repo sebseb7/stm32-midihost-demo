@@ -141,7 +141,7 @@ uint8_t USBH_Modify_Channel (USB_OTG_CORE_HANDLE *pdev,
                             uint8_t hc_num,
                             uint8_t dev_address,
                             uint8_t speed,
-                            uint8_t ep_type,
+                            __attribute__((unused)) uint8_t ep_type,
                             uint16_t mps)
 {
   

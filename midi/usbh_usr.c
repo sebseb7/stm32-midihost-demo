@@ -105,7 +105,7 @@ void USBH_USR_ResetDevice(void)
  * @param  Devicespeed : Device Speed
  * @retval None
  */
-void USBH_USR_DeviceSpeedDetected(uint8_t DeviceSpeed)
+void USBH_USR_DeviceSpeedDetected(__attribute__((unused)) uint8_t DeviceSpeed)
 {
 
 }
@@ -116,7 +116,7 @@ void USBH_USR_DeviceSpeedDetected(uint8_t DeviceSpeed)
  * @param  DeviceDesc : device descriptor
  * @retval None
  */
-void USBH_USR_Device_DescAvailable(void *DeviceDesc)
+void USBH_USR_Device_DescAvailable(__attribute__((unused)) void *DeviceDesc)
 {
 
 }
@@ -139,9 +139,9 @@ void USBH_USR_DeviceAddressAssigned(void)
  * @param  ConfDesc : Configuration descriptor
  * @retval None
  */
-void USBH_USR_Configuration_DescAvailable(USBH_CfgDesc_TypeDef * cfgDesc,
-		USBH_InterfaceDesc_TypeDef *itfDesc,
-		USBH_EpDesc_TypeDef *epDesc)
+void USBH_USR_Configuration_DescAvailable(__attribute__((unused)) USBH_CfgDesc_TypeDef * cfgDesc,
+		__attribute__((unused)) USBH_InterfaceDesc_TypeDef *itfDesc,
+		__attribute__((unused)) USBH_EpDesc_TypeDef *epDesc)
 {
 
 }
@@ -152,7 +152,7 @@ void USBH_USR_Configuration_DescAvailable(USBH_CfgDesc_TypeDef * cfgDesc,
  * @param  ManufacturerString : Manufacturer String of Device
  * @retval None
  */
-void USBH_USR_Manufacturer_String(void *ManufacturerString)
+void USBH_USR_Manufacturer_String(__attribute__((unused)) void *ManufacturerString)
 {
 
 }
@@ -163,7 +163,7 @@ void USBH_USR_Manufacturer_String(void *ManufacturerString)
  * @param  ProductString : Product String of Device
  * @retval None
  */
-void USBH_USR_Product_String(void *ProductString)
+void USBH_USR_Product_String(__attribute__((unused)) void *ProductString)
 {
 
 }
@@ -174,7 +174,7 @@ void USBH_USR_Product_String(void *ProductString)
  * @param  SerialNumString : SerialNum_String of device
  * @retval None
  */
-void USBH_USR_SerialNum_String(void *SerialNumString)
+void USBH_USR_SerialNum_String(__attribute__((unused)) void *SerialNumString)
 {
 
 }

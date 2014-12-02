@@ -206,23 +206,13 @@ void start_LED_On(Led_TypeDef Led, uint32_t duration)
   GPIO_PORT[Led]->BSRRL = GPIO_PIN[Led];
   BlueLED_counter = duration;
 }
-void start_LED_On2(Led_TypeDef Led, uint32_t duration)
-{
-  GPIO_PORT[Led]->BSRRL = GPIO_PIN[Led];
-  RedLED_counter = duration;
-}
 
 /*------------------------------------------------------------------------------------*/
 /* Function called by SysTick_Handler()  */
-void update_temporized_LED(Led_TypeDef Led)
+void update_temporized_LED(__attribute__((unused)) Led_TypeDef Led)
 {
 	BlueLED_counter--;
 	if (BlueLED_counter == 0) STM_EVAL_LEDOff(LED_Blue);
-}
-void update_temporized_LED2(Led_TypeDef Led)
-{
-	RedLED_counter--;
-	if (RedLED_counter == 0) STM_EVAL_LEDOff(LED_Red);
 }
 
 /***************************************************************************************************************************/

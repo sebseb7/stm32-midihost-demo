@@ -183,7 +183,7 @@ static USBH_Status USBH_MIDI_InterfaceInit ( USB_OTG_CORE_HANDLE *pdev,	void *ph
  * @retval None
  */
 void USBH_MIDI_InterfaceDeInit ( USB_OTG_CORE_HANDLE *pdev,
-		void *phost)
+		__attribute__((unused)) void *phost)
 {
 	if ( MIDI_Machine.hc_num_out)
 	{
@@ -209,8 +209,8 @@ void USBH_MIDI_InterfaceDeInit ( USB_OTG_CORE_HANDLE *pdev,
  * @param  hdev: Selected device property
  * @retval  USBH_Status :Response for USB Set Protocol request
  */
-static USBH_Status USBH_MIDI_ClassRequest(USB_OTG_CORE_HANDLE *pdev ,
-		void *phost)
+static USBH_Status USBH_MIDI_ClassRequest(__attribute__((unused)) USB_OTG_CORE_HANDLE *pdev ,
+		__attribute__((unused)) void *phost)
 {
 	USBH_Status status = USBH_OK ;
 

@@ -91,6 +91,7 @@ int main(void)
 
 		while (1)
 		{
+
 			delay_ms(100);
 			MIDI_send(0xb0,32,127);
 			delay_ms(100);

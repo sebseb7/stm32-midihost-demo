@@ -80,7 +80,7 @@ void BSP_Init(void)
  * @param  None
  * @retval None
  */
-void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
+void USB_OTG_BSP_Init(__attribute__((unused)) USB_OTG_CORE_HANDLE *pdev)
 {
 	/* Note: On STM32F4-Discovery board only USB OTG FS core is supported. */
 
@@ -244,7 +244,7 @@ GPIO_InitTypeDef GPIO_InitStructure;
  * @param  None
  * @retval None
  */
-void USB_OTG_BSP_EnableInterrupt(USB_OTG_CORE_HANDLE *pdev)
+void USB_OTG_BSP_EnableInterrupt(__attribute__((unused)) USB_OTG_CORE_HANDLE *pdev)
 {
 
 	NVIC_InitTypeDef NVIC_InitStructure;
@@ -272,7 +272,7 @@ void USB_OTG_BSP_EnableInterrupt(USB_OTG_CORE_HANDLE *pdev)
  * @param  state : VBUS states
  * @retval None
  */
-void USB_OTG_BSP_DriveVBUS(USB_OTG_CORE_HANDLE *pdev, uint8_t state)
+void USB_OTG_BSP_DriveVBUS(__attribute__((unused)) USB_OTG_CORE_HANDLE *pdev, uint8_t state)
 {
 	/*
   On-chip 5 V VBUS generation is not supported. For this reason, a charge pump 
@@ -304,7 +304,7 @@ void USB_OTG_BSP_DriveVBUS(USB_OTG_CORE_HANDLE *pdev, uint8_t state)
  * @param  None
  * @retval None
  */
-void  USB_OTG_BSP_ConfigVBUS(USB_OTG_CORE_HANDLE *pdev)
+void  USB_OTG_BSP_ConfigVBUS(__attribute__((unused)) USB_OTG_CORE_HANDLE *pdev)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 

@@ -37,7 +37,7 @@ caddr_t _sbrk(int incr) {
 
 }
 
-int _write(int file, char *ptr, int len)
+int _write(__attribute__((unused)) int file, char *ptr, int len)
 {
 	int i=0;
 	for(i=0 ; i<len ; i++)
@@ -45,7 +45,7 @@ int _write(int file, char *ptr, int len)
 	return len;
 }
 
-int _fstat(int file, struct stat *st)
+int _fstat(__attribute__((unused)) int file, struct stat *st)
 {
 	st->st_mode = S_IFCHR;
 	return 0;
@@ -53,8 +53,6 @@ int _fstat(int file, struct stat *st)
 
 int _isatty(int file)
 {
-
-
 	switch (file)
 	{
 		case STDOUT_FILENO:
@@ -67,17 +65,17 @@ int _isatty(int file)
 	}
 }
 
-int _close(int file)
+int _close(__attribute__((unused)) int file)
 {
 	return -1;
 }
 
-int _lseek(int file, int ptr, int dir)
+int _lseek(__attribute__((unused)) int file, __attribute__((unused)) int ptr, __attribute__((unused)) int dir)
 {
 	return 0;
 }
 
-int _read(int file, char *ptr, int len)
+int _read(__attribute__((unused)) int file, __attribute__((unused)) char *ptr, __attribute__((unused)) int len)
 {
 	errno = EBADF;
 	return -1;

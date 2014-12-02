@@ -141,7 +141,7 @@ uint8_t USBH_Disconnected (USB_OTG_CORE_HANDLE *pdev)
   * @retval Status
   */
 
-uint8_t USBH_SOF (USB_OTG_CORE_HANDLE *pdev)
+uint8_t USBH_SOF (__attribute__((unused)) USB_OTG_CORE_HANDLE *pdev)
 {
   /* This callback could be used to implement a scheduler process */
   return 0;  

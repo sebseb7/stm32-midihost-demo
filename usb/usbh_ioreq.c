@@ -102,7 +102,7 @@ static USBH_Status USBH_SubmitSetupRequest(USBH_HOST *phost,
   * @param  length: length of the response
   * @retval Status
   */
-USBH_Status USBH_CtlReq     (USB_OTG_CORE_HANDLE *pdev, 
+USBH_Status USBH_CtlReq     (__attribute__((unused)) USB_OTG_CORE_HANDLE *pdev, 
                              USBH_HOST           *phost, 
                              uint8_t             *buff,
                              uint16_t            length)
