@@ -54,12 +54,6 @@ MIDI_Machine_t				MIDI_Machine  ;
 
 USB_Setup_TypeDef			MIDI_Setup  ;
 
-//USBH_MIDIDesc_t			MIDI_Desc  ;
-
-__IO uint8_t 				start_toggle = 0;
-
-//int State;
-
 /*-----------------------------------------------------------------------------------------*/
 
 static USBH_Status 	USBH_MIDI_InterfaceInit(USB_OTG_CORE_HANDLE *pdev , void *phost);
@@ -86,12 +80,10 @@ USBH_Class_cb_TypeDef  MIDI_cb =
 #define SEND_BUFFER_MASK (SEND_BUFFER_SIZE-1)
 
 static struct {
-	uint8_t by1[SEND_BUFFER_SIZE];
-	uint8_t by2[SEND_BUFFER_SIZE];
-	uint8_t by3[SEND_BUFFER_SIZE];
+	MIDI_EventPacket_t event[SEND_BUFFER_SIZE];
 	uint8_t read;
 	uint8_t write; 
-} send_buffer = {{}, {},{},0, 0};
+} send_buffer;
 
 
 /*-----------------------------------------------------------------------------------------*/
@@ -159,8 +151,10 @@ static USBH_Status USBH_MIDI_InterfaceInit ( USB_OTG_CORE_HANDLE *pdev,	void *ph
 
 		MIDI_Machine.state_out  = MIDI_DATA;
 		MIDI_Machine.state_in  = MIDI_DATA;
-		start_toggle =0;
 		status = USBH_OK;
+
+		send_buffer.read=0;
+		send_buffer.write=0;
 
 	}
 
@@ -198,7 +192,6 @@ void USBH_MIDI_InterfaceDeInit ( USB_OTG_CORE_HANDLE *pdev,
 		USBH_Free_Channel  (pdev, MIDI_Machine.hc_num_in);
 		MIDI_Machine.hc_num_in = 0;     /* Reset the Channel as Free */
 	}
-	start_toggle = 0;
 }
 /*-----------------------------------------------------------------------------------------*/
 /**
@@ -217,17 +210,17 @@ static USBH_Status USBH_MIDI_ClassRequest(__attribute__((unused)) USB_OTG_CORE_H
 	return status;
 }
 
-void MIDI_send(uint8_t by1,uint8_t by2, uint8_t by3)
-{
 
+int MIDI_send(MIDI_EventPacket_t packet)
+{
 	uint8_t next = ((send_buffer.write + 1) & SEND_BUFFER_MASK);
 	if (send_buffer.read != next)
 	{
-		send_buffer.by1[send_buffer.write & SEND_BUFFER_MASK] = by1;
-		send_buffer.by2[send_buffer.write & SEND_BUFFER_MASK] = by2;
-		send_buffer.by3[send_buffer.write & SEND_BUFFER_MASK] = by3;
+		send_buffer.event[send_buffer.write & SEND_BUFFER_MASK] = packet;
 		send_buffer.write = next;
+		return 1;
 	}
+	return 0;
 }
 
 
@@ -264,8 +257,8 @@ static USBH_Status USBH_MIDI_Handle(USB_OTG_CORE_HANDLE *pdev ,
 
 			case MIDI_DATA:
 
-				memset(MIDI_Machine.buff,0,USBH_MIDI_MPS_SIZE);
-				USBH_BulkReceiveData( &USB_OTG_Core_dev, MIDI_Machine.buff, 64, MIDI_Machine.hc_num_in);
+				memset(MIDI_Machine.buff_in,0,USBH_MIDI_MPS_SIZE);
+				USBH_BulkReceiveData( &USB_OTG_Core_dev, MIDI_Machine.buff_in, 64, MIDI_Machine.hc_num_in);
 				MIDI_Machine.state_in = MIDI_POLL;
 
 				break;
@@ -280,24 +273,16 @@ static USBH_Status USBH_MIDI_Handle(USB_OTG_CORE_HANDLE *pdev ,
 				else if(HCD_GetURB_State(pdev , MIDI_Machine.hc_num_in) == URB_DONE)
 				{
 					int i = 1;
-					while((i < USBH_MIDI_MPS_SIZE) && (MIDI_Machine.buff[i] != 0))
+					while((i < USBH_MIDI_MPS_SIZE) && (MIDI_Machine.buff_in[i] != 0))
 					{
-						// do nothing with the received packet, if it is a button just send it back, to control the LEDs
-						if(MIDI_Machine.buff[2] > 23)
-						{
-							uint8_t next = ((send_buffer.write + 1) & SEND_BUFFER_MASK);
-							if (send_buffer.read != next)
-							{
-								send_buffer.by1[send_buffer.write & SEND_BUFFER_MASK] = MIDI_Machine.buff[i];
-								send_buffer.by2[send_buffer.write & SEND_BUFFER_MASK] = MIDI_Machine.buff[i+1];
-								send_buffer.by3[send_buffer.write & SEND_BUFFER_MASK] = MIDI_Machine.buff[i+2];
-								send_buffer.write = next;
-							}
-							else
-							{
-								start_LED_On(LED_Blue, 8);
-							}
-						}
+						//printf("recv (%i) %i %i %i %i\n",i,MIDI_Machine.buff_in[i-1],MIDI_Machine.buff_in[i],MIDI_Machine.buff_in[i+1],MIDI_Machine.buff_in[i+2]);
+						MIDI_EventPacket_t packet;
+						packet.status = MIDI_Machine.buff_in[i];
+						packet.data1 = MIDI_Machine.buff_in[i+1];
+						packet.data2 = MIDI_Machine.buff_in[i+2];
+						
+						MIDI_recv_cb(packet);
+						
 						i+=4;
 					}
 					MIDI_Machine.state_in = MIDI_DATA;
@@ -330,14 +315,15 @@ static USBH_Status USBH_MIDI_Handle(USB_OTG_CORE_HANDLE *pdev ,
 
 				if (send_buffer.read != send_buffer.write)
 				{
-					MIDI_Machine.buff[0] = 0xb;
-					MIDI_Machine.buff[1] = send_buffer.by1[send_buffer.read];
-					MIDI_Machine.buff[2] = send_buffer.by2[send_buffer.read];; 
-					MIDI_Machine.buff[3] = send_buffer.by3[send_buffer.read];; 
+					MIDI_Machine.buff_out[0] = send_buffer.event[send_buffer.read].type;
+					MIDI_Machine.buff_out[1] = send_buffer.event[send_buffer.read].status;
+					MIDI_Machine.buff_out[2] = send_buffer.event[send_buffer.read].data1; 
+					MIDI_Machine.buff_out[3] = send_buffer.event[send_buffer.read].data2; 
 					send_buffer.read = (send_buffer.read+1) & SEND_BUFFER_MASK;
+					
+					//printf("send %i %i %i %i\n",MIDI_Machine.buff_out[0],MIDI_Machine.buff_out[1],MIDI_Machine.buff_out[2],MIDI_Machine.buff_out[3]);
 
-
-					USBH_BulkSendData( &USB_OTG_Core_dev, MIDI_Machine.buff, 4, MIDI_Machine.hc_num_out);
+					USBH_BulkSendData( &USB_OTG_Core_dev, MIDI_Machine.buff_out, 4, MIDI_Machine.hc_num_out);
 					MIDI_Machine.state_out = MIDI_POLL;
 				}
 
@@ -346,7 +332,6 @@ static USBH_Status USBH_MIDI_Handle(USB_OTG_CORE_HANDLE *pdev ,
 
 				if(HCD_GetURB_State(pdev , MIDI_Machine.hc_num_out) == URB_DONE)
 				{
-					//	start_LED_On(LED_Blue, 8);
 					MIDI_Machine.state_out = MIDI_DATA;
 				}
 				else if(HCD_GetURB_State(pdev , MIDI_Machine.hc_num_out) == URB_NOTREADY)
@@ -364,54 +349,8 @@ static USBH_Status USBH_MIDI_Handle(USB_OTG_CORE_HANDLE *pdev ,
 	return status;
 
 }
-/*-----------------------------------------------------------------------------------------*/
-/* look up a MIDI message size from spec */
-/*Return */
-/* 0 : undefined message */
-/* > 0 : valid message size (1-3) */
-uint8_t MIDI_lookupMsgSize(uint8_t midiMsg)
-{
-	uint8_t msgSize = 0;
 
-	if( midiMsg < 0xf0 ) midiMsg &= 0xf0;
-	switch(midiMsg) {
-		//3 bytes messages
-		case 0xf2 : //system common message(SPP)
-		case 0x80 : //Note off
-		case 0x90 : //Note on
-		case 0xa0 : //Poly KeyPress
-		case 0xb0 : //Control Change
-		case 0xe0 : //PitchBend Change
-			msgSize = 3;
-			break;
-
-			//2 bytes messages
-		case 0xf1 : //system common message(MTC)
-		case 0xf3 : //system common message(SongSelect)
-		case 0xc0 : //Program Change
-		case 0xd0 : //Channel Pressure
-			msgSize = 2;
-			break;
-
-			//1 bytes messages
-		case 0xf8 : //system realtime message
-		case 0xf9 : //system realtime message
-		case 0xfa : //system realtime message
-		case 0xfb : //system realtime message
-		case 0xfc : //system realtime message
-		case 0xfe : //system realtime message
-		case 0xff : //system realtime message
-			msgSize = 1;
-			break;
-
-			//undefine messages
-		default :
-			break;
-	}
-	return msgSize;
-}
-
-/*-----------------------------------------------------------------------------------------*/
+void __attribute__((weak)) MIDI_recv_cb(MIDI_EventPacket_t packet);
 
 
 

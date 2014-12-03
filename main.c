@@ -89,12 +89,25 @@ int main(void)
 
 		usb_ready=1;
 
+		MIDI_EventPacket_t packet;
+		packet.channel = 0;
+		packet.type = CC;
+		packet.cc = 32;
+
 		while (1)
 		{
 
 			delay_ms(100);
-			MIDI_send(0xb0,32,127);
+			packet.value = 127;
+			MIDI_send(packet);
 			delay_ms(100);
-			MIDI_send(0xb0,32,0);
+			packet.value = 0;
+			MIDI_send(packet);
 		}
 }
+
+void MIDI_recv_cb(MIDI_EventPacket_t packet)
+{
+	MIDI_send(packet);
+}
+
