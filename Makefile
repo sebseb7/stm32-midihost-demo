@@ -13,20 +13,16 @@ CORTEXM=4
 endif
 
 
-SRC=$(wildcard  *.c usb/*.c midi/*.c libs/*.c) \
-	core/startup_stm32f4xx.c \
-	core/stm32fxxx_it.c \
-	core/syscalls.c \
-	core/system_stm32f$(STM32F)xx.c 
+SRC=$(wildcard  core/*.c *.c usb/*.c midi/*.c STM32F4_drivers/src/*.c)
 
-#ASRC=core/startup_stm32f$(STM32F)xx.s
-OBJECTS= $(SRC:.c=.o)
-#$(ASRC:.s=.o)
-LSTFILES= $(SRC:.c=.lst)
-HEADERS=$(wildcard usb/*.h core/*.h *.h midi/*.h libs/*.h)
+OBJECTS=$(patsubst %,.bin/%,$(SRC:.c=.o)) 
+LSTFILES=$(patsubst %,.bin/%,$(SRC:.c=.lst)) 
+DEPS   =$(patsubst %,.bin/%,$(SRC:.c=.d)) 
+
+
 
 #  Compiler Options
-GCFLAGS = -DSTM32F=$(STM32F) -ffreestanding -std=gnu99 -mcpu=cortex-m$(CORTEXM) -mthumb $(OPTIMIZATION) -I. -Imidi -Icore -Iusb -DARM_MATH_CM$(CORTEXM) -DSTM32F40_41xxx -D__FPU_USED=1 -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=8000000 -DSTM32F407VG
+GCFLAGS = -DSTM32F=$(STM32F) -ffreestanding -std=gnu99 -mcpu=cortex-m$(CORTEXM) -mthumb $(OPTIMIZATION) -I. -Imidi -Icore -Iusb -DARM_MATH_CM$(CORTEXM) -DSTM32F40_41xxx -D__FPU_USED=1 -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=8000000 -DSTM32F407VG -flto
 ifeq ($(CORTEXM),4)
 GCFLAGS+= -mfpu=fpv4-sp-d16 -mfloat-abi=hard -falign-functions=16 
 endif
@@ -35,7 +31,7 @@ GCFLAGS += -Wstrict-prototypes -Wundef -Wall -Wextra -Wunreachable-code -Wno-str
 # Optimizazions
 GCFLAGS += -fstrict-aliasing -fsingle-precision-constant -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -fno-builtin -ffunction-sections -fno-common -fdata-sections 
 # Debug stuff
-GCFLAGS += -Wa,-adhlns=$(<:.c=.lst),-gstabs -g 
+GCFLAGS += -Wa,-adhlns=.bin/$(<:.c=.lst),-gstabs -g 
 
 GCFLAGS+= -ISTM32F$(STM32F)_drivers/inc
 
@@ -45,7 +41,8 @@ ifeq ($(CORTEXM),4)
 LDFLAGS+= -mfpu=fpv4-sp-d16 -mfloat-abi=hard -falign-functions=16
 endif
 #LDFLAGS+= -LSTM32F$(STM32F)_drivers/build -lSTM32F$(STM32F)xx_drivers -lm -lnosys -lc --specs=nano.specs -Wl,--gc-section 
-LDFLAGS+= -LSTM32F$(STM32F)_drivers/build -lSTM32F$(STM32F)xx_drivers -lm -Wl,--gc-section 
+#LDFLAGS+= -LSTM32F$(STM32F)_drivers/build -lSTM32F$(STM32F)xx_drivers 
+LDFLAGS+= -lm -Wl,--gc-section 
 
 
 #  Compiler/Assembler Paths
@@ -57,25 +54,27 @@ SIZE = arm-none-eabi-size
 
 #########################################################################
 
-all: STM32F$(STM32F)_drivers/build/libSTM32F$(STM32F)_drivers.a $(PROJECT).bin Makefile 
-	@$(SIZE) $(PROJECT).elf
+all: .bin/$(PROJECT).bin Makefile 
 
 STM32F$(STM32F)_drivers/build/libSTM32F$(STM32F)_drivers.a:
 	@make -C STM32F$(STM32F)_drivers/build
 
-$(PROJECT).bin: $(PROJECT).elf Makefile
-	@echo "generating $(PROJECT).bin"
-	@$(OBJCOPY) -R .stack -O binary $(PROJECT).elf $(PROJECT).bin
+.bin/$(PROJECT).bin: .bin/$(PROJECT).elf Makefile
+	@echo "  OBJCOPY $(PROJECT).bin"
+	@$(OBJCOPY) --strip-unneeded -S -g -R .stack -O binary .bin/$(PROJECT).elf .bin/$(PROJECT).bin
 
-$(PROJECT).elf: $(OBJECTS) Makefile $(LSCRIPT)
+.bin/$(PROJECT).elf: $(OBJECTS) Makefile $(LSCRIPT)
 	@echo "  LD $(PROJECT).elf"
-	@$(GCC) $(OBJECTS) $(LDFLAGS)  -o $(PROJECT).elf
+	@$(GCC) $(OBJECTS) $(LDFLAGS)  -o .bin/$(PROJECT).elf
+	@$(SIZE) .bin/$(PROJECT).elf
 
 clean:
+	$(REMOVE) $(DEPS)
 	$(REMOVE) $(OBJECTS)
 	$(REMOVE) $(LSTFILES)
-	$(REMOVE) $(PROJECT).bin
-	$(REMOVE) $(PROJECT).elf
+	$(REMOVE) .bin/$(PROJECT).bin
+	$(REMOVE) .bin/$(PROJECT).elf
+	$(REMOVE) -r .bin
 #	make -C STM32F$(STM32F)_drivers/build clean
 
 tools/flash/st-flash:
@@ -83,11 +82,19 @@ tools/flash/st-flash:
 
 #########################################################################
 
-%.o: %.c Makefile $(HEADERS)
-	@echo "  GCC $<"
-	@$(GCC) $(GCFLAGS) -o $@ -c $<
+-include $(DEPS)
 
-%.o: %.s Makefile 
+.bin/%.o: %.c Makefile
+	@echo "  GCC $<"
+	@mkdir -p $(dir $@)
+	@$(GCC) $(GCFLAGS) -o $@ -c $<
+	@$(GCC) $(GCFLAGS) -MM $< > $*.d.tmp
+	@sed -e 's|.*:|.bin/$*.o:|' < $*.d.tmp > .bin/$*.d
+	@sed -e 's/.*://' -e 's/\\$$//' < $*.d.tmp | fmt -1 | \
+		sed -e 's/^ *//' -e 's/$$/:/' >> .bin/$*.d
+	@rm -f $*.d.tmp
+
+.bin/%.o: %.s Makefile 
 	@echo "  AS $<"
 	@$(AS) $(ASFLAGS) -o $@  $< 
 
@@ -97,4 +104,4 @@ flash: tools/flash/st-flash all
 
 	tools/flash/st-flash --reset write $(PROJECT).bin 0x08000000 
 
-.PHONY : clean all flash
+.PHONY : clean all flash debug
