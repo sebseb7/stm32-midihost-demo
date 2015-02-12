@@ -13,7 +13,7 @@ CORTEXM=4
 endif
 
 
-SRC=$(wildcard  core/*.c *.c usb/*.c midi/*.c STM32F4_drivers/src/*.c)
+SRC=$(wildcard  core/*.c *.c usb/*.c midi/*.c disp/*.c STM32F4_drivers/src/*.c)
 
 OBJECTS=$(patsubst %,.bin/%,$(SRC:.c=.o)) 
 LSTFILES=$(patsubst %,.bin/%,$(SRC:.c=.lst)) 

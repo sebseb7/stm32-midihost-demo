@@ -17,6 +17,9 @@
 #include "stm32f4xx_conf.h"
 #include "stm32fxxx_it.h"
 
+#include "disp/GLCD.h"
+
+
 void USB_Host_Handle(void);
 void TimingDelay_Decrement(void);
 void delay_ms(__IO uint32_t nTime);

@@ -7,3 +7,4 @@
 *.lst
 *.swp
 tools/flash/st-flash
+tools/gdbserver/st-util

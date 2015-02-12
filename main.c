@@ -39,6 +39,19 @@ int main(void) {
 	STM_EVAL_LEDInit(LED_Red);
 	STM_EVAL_LEDInit(LED_Blue);
 
+	LCD_Initializtion();
+	//LCD_Configuration();
+	//LCD_Clear(0xffff);
+	
+	
+	while (1) {
+		delay_ms(100);
+		//LCD_Clear(0xffff);
+		STM_EVAL_LEDToggle(LED_Green);
+		delay_ms(100);
+		//LCD_Clear(0x0000);
+		STM_EVAL_LEDToggle(LED_Green);
+	}
 
 	printf("usb-init\n");
 	USBH_Init(&USB_OTG_Core_dev,
