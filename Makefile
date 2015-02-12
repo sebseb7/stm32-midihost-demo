@@ -13,7 +13,7 @@ CORTEXM=4
 endif
 
 
-SRC=$(wildcard  core/*.c *.c usb/*.c midi/*.c disp/*.c STM32F4_drivers/src/*.c)
+SRC=$(wildcard  core/*.c *.c usb/*.c midi/*.c mcugui/*.c libs/*.c disp/*.c STM32F4_drivers/src/*.c)
 
 OBJECTS=$(patsubst %,.bin/%,$(SRC:.c=.o)) 
 LSTFILES=$(patsubst %,.bin/%,$(SRC:.c=.lst)) 
@@ -22,7 +22,7 @@ DEPS   =$(patsubst %,.bin/%,$(SRC:.c=.d))
 
 
 #  Compiler Options
-GCFLAGS = -DSTM32F=$(STM32F) -ffreestanding -std=gnu99 -mcpu=cortex-m$(CORTEXM) -mthumb $(OPTIMIZATION) -I. -Imidi -Icore -Iusb -DARM_MATH_CM$(CORTEXM) -DSTM32F40_41xxx -D__FPU_USED=1 -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=8000000 -DSTM32F407VG -flto
+GCFLAGS = -DSTM32F=$(STM32F) -ffreestanding -std=gnu99 -mcpu=cortex-m$(CORTEXM) -mthumb $(OPTIMIZATION) -Idisp -I. -Imidi -Icore -Iusb -DARM_MATH_CM$(CORTEXM) -DSTM32F40_41xxx -D__FPU_USED=1 -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=8000000 -DSTM32F407VG -flto
 ifeq ($(CORTEXM),4)
 GCFLAGS+= -mfpu=fpv4-sp-d16 -mfloat-abi=hard -falign-functions=16 
 endif

@@ -55,11 +55,11 @@ void LCD_Configuration(void)
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_Init(GPIOE, &GPIO_InitStructure);
 	
-	/* PC.08(RS), PC.07(WR), PC.06(RD) */
+	/* PC.08(RS), PC.11(WR), PC.06(RD) */
 
         /* setting the IO to output mode */
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_11 | GPIO_Pin_8;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -377,9 +377,9 @@ void LCD_Initializtion(void)
 	}
 
 		static unsigned bt = 6; /* VGL=Vci*4 , VGH=Vci*4 */
-		static unsigned vc = 0b011; /* Vci1=Vci*0.80 */
+		static unsigned vc = 0b101; /* Vci1=Vci*0.80 */
 		static unsigned vrh = 0b1101; /* VREG1OUT=Vci*1.85 */
-		static unsigned vdv = 0b10010; /* VCOMH amplitude=VREG1OUT*0.98 */
+		static unsigned vdv = 0b01000; /* VCOMH amplitude=VREG1OUT*0.98 */ //aendert farbkontrast, bei niedrigen wert sehen volle farben gut aus.
 		static unsigned vcm = 0b001010; /* VCOMH=VREG1OUT*0.735 */
 		
 		bt &= 0b111;
@@ -400,7 +400,7 @@ void LCD_Initializtion(void)
 		LCD_WriteReg( 0x0008, 0x0207); /* set the back porch and front porch */
 		LCD_WriteReg( 0x0009, 0x0000); /* set non-display area refresh cycle */
 		LCD_WriteReg( 0x000A, 0x0000); /* FMARK function */
-		LCD_WriteReg( 0x000C, 0x0000); /* RGB interface setting */
+		LCD_WriteReg( 0x000C, 0x0001); /* RGB interface setting was 0*/
 		LCD_WriteReg( 0x000D, 0x0000); /* Frame marker Position */
 		LCD_WriteReg( 0x000F, 0x0000); /* RGB interface polarity */
 
@@ -412,13 +412,13 @@ void LCD_Initializtion(void)
 		delay_ms(200); /* Dis-charge capacitor power voltage */
 		LCD_WriteReg( 0x0010, /* SAP, BT[3:0], AP, DSTB, SLP, STB */
 				(1 << 12) | (bt << 8) | (1 << 7) | (0b001 << 4));
-		LCD_WriteReg( 0x0011, 0x220 | vc); /* DC1[2:0], DC0[2:0], VC[2:0] */
+		LCD_WriteReg( 0x0011, 0x0220 | vc); /* DC1[2:0], DC0[2:0], VC[2:0] */
 		delay_ms(50); /* Delay 50ms */
 		LCD_WriteReg( 0x0012, vrh); /* Internal reference voltage= Vci; */
 		delay_ms(50); /* Delay 50ms */
 		LCD_WriteReg( 0x0013, vdv << 8); /* Set VDV[4:0] for VCOM amplitude */
 		LCD_WriteReg( 0x0029, vcm); /* Set VCM[5:0] for VCOMH */
-		LCD_WriteReg( 0x002B, 0x000C); /* Set Frame Rate */
+		LCD_WriteReg( 0x002B, 0x000e); /* Set Frame Rate */ // 5 flickers but should not: 40fps
 		delay_ms(50); /* Delay 50ms */
 		LCD_WriteReg( 0x0020, 0x0000); /* GRAM horizontal Address */
 		LCD_WriteReg( 0x0021, 0x0000); /* GRAM Vertical Address */

@@ -61,8 +61,8 @@
 #define Set_Rs        GPIOC->ODR  |= ( 1<<8 );
 #define Clr_Rs        GPIOC->ODR  &= ~( 1<<8 );
 
-#define Set_nWr       GPIOC->ODR  |= ( 1<<7 );
-#define Clr_nWr       GPIOC->ODR  &= ~( 1<<7 );
+#define Set_nWr       GPIOC->ODR  |= ( 1<<11 );
+#define Clr_nWr       GPIOC->ODR  &= ~( 1<<11 );
 
 #define Set_nRd       GPIOC->ODR  |= ( 1<<6 );
 #define Clr_nRd       GPIOC->ODR  &= ~( 1<<6 );

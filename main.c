@@ -1,5 +1,10 @@
 #include "main.h"
 
+#include "mcugui/rect.h"
+#include "libs/armmath.h"
+#include "pixel_hal.h"
+#include "GLCD.h"
+
 
 __ALIGN_BEGIN USB_OTG_CORE_HANDLE		USB_OTG_Core_dev __ALIGN_END;
 __ALIGN_BEGIN USBH_HOST					USB_Host __ALIGN_END;
@@ -26,6 +31,7 @@ void USB_Host_Handle() {
 
 void init_audio(void);
 
+
 int main(void) {
 
 	RCC_ClocksTypeDef RCC_Clocks;
@@ -38,50 +44,11 @@ int main(void) {
 	STM_EVAL_LEDInit(LED_Orange);
 	STM_EVAL_LEDInit(LED_Red);
 	STM_EVAL_LEDInit(LED_Blue);
+	
+	clearDisplay();
 
 	LCD_Initializtion();
-	//LCD_Configuration();
-	//LCD_Clear(0xffff);
 	
-	
-	while (1) {
-		delay_ms(100);
-		LCD_Clear(0xffff);
-		STM_EVAL_LEDToggle(LED_Green);
-		delay_ms(200);
-		LCD_Clear(0x0000);
-		STM_EVAL_LEDToggle(LED_Green);
-	
-	
-		LCD_SetCursor(0,0); 
-
-		Clr_Cs;  /* Cs low */
-
-		/* selected LCD register */ 
-		LCD_WriteIndex(0x0022);
-
-		for( int index = 0; index < 320*80; index++ )
-		{
-			/* Write data */
-			int d = index % 320;
-			LCD_WriteData( d/10 );
-		}
-		for( int index = 0; index < 320*80; index++ )
-		{
-			/* Write data */
-			int d = index % 320;
-			LCD_WriteData( (d/10)<<6 );
-		}
-		for( int index = 0; index < 320*80; index++ )
-		{
-			/* Write data */
-			int d = index % 320;
-			LCD_WriteData( (d/10)<<11 );
-		}
-
-		Set_Cs;  /* Cs high */
-		delay_ms(2000);
-	}
 
 	printf("usb-init\n");
 	USBH_Init(&USB_OTG_Core_dev,
@@ -95,23 +62,15 @@ int main(void) {
 	init_audio();
 
 	usb_ready = 1;
-/*
-	MIDI_EventPacket_t packet;
-	packet.channel = 0;
-	packet.type = CC;
-	packet.cc = 32;
-*/
+	
+	while (1) {
+		draw_filledRect(randr(0,320),randr(0,240),randr(50,100),randr(50,100),randr(0,255),randr(0,255),randr(0,255));
+		sync_frame();
+	}
 
 	while (1) {
-		delay_ms(100);
-	//	STM_EVAL_LEDToggle(LED_Green);
-/*
-		packet.value = 127;
-		MIDI_send(packet);
-		delay_ms(100);
-		packet.value = 0;
-		MIDI_send(packet);
-*/
+		draw_filledRect(randr(0,320),randr(0,240),randr(50,100),randr(50,100),randr(0,255),randr(0,255),randr(0,255));
+		sync_frame();
 	}
 }
 
