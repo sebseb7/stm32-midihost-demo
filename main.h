@@ -12,6 +12,7 @@
 #include "usbh_midi_core.h"
 
 #include "my_stm32f4_discovery.h"
+#include "my_stm32f4_discovery_audio_codec.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_conf.h"
 #include "stm32fxxx_it.h"
