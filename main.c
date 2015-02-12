@@ -1,49 +1,13 @@
-/**
- ******************************************************************************
- * @file    main.c
- * @author	Xavier Halgand
- * @version
- * @date
- * @brief   Dekrispator main file
- ******************************************************************************
- *
- *
- ******************************************************************************
- */
-
-/*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*
-*/
-
-/* Includes ------------------------------------------------------------------*/
-
 #include "main.h"
 
-/*---------------------------------------------------------------------------*/
 
 __ALIGN_BEGIN USB_OTG_CORE_HANDLE		USB_OTG_Core_dev __ALIGN_END;
-
 __ALIGN_BEGIN USBH_HOST					USB_Host __ALIGN_END;
 
-/*====================================================================================================*/
 
 static __IO uint32_t TimingDelay;
 void delay_ms(__IO uint32_t nTime) {
 	TimingDelay = nTime*10;
-
 	while(TimingDelay != 0);
 }
 
@@ -159,35 +123,22 @@ static void fill_audio_buffer(uint16_t offset, uint16_t length) {
 
 
 void init_audio(void) {
-
 	EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 //	EVAL_AUDIO_Init(OUTPUT_DEVICE_AUTO, 70, MIXRATE);
 	EVAL_AUDIO_Init(OUTPUT_DEVICE_AUTO, 60, MIXRATE);
-
 	EVAL_AUDIO_Play(audio_buffer, BUFFER_SIZE);
-/*
-	while (1) {
-		GPIO_SetBits(GPIOD, GPIO_Pin_12);
-		delay_ms(200);
-		GPIO_ResetBits(GPIOD, GPIO_Pin_12);
-		delay_ms(200);
-	}
-*/
-
 }
+
 void EVAL_AUDIO_HalfTransfer_CallBack(__attribute__((unused)) uint32_t pBuffer, __attribute__((unused)) uint32_t Size) {
-	GPIO_SetBits(GPIOD, GPIO_Pin_15);
 	fill_audio_buffer(0, BUFFER_SIZE/2);
 }
+
 void EVAL_AUDIO_TransferComplete_CallBack(__attribute__((unused)) uint32_t pBuffer, __attribute__((unused)) uint32_t Size) {
-	GPIO_ResetBits(GPIOD, GPIO_Pin_15);
 	fill_audio_buffer(BUFFER_SIZE/2, BUFFER_SIZE/2);
 }
+
 uint32_t Codec_TIMEOUT_UserCallback(void) { return 0; }
 uint16_t EVAL_AUDIO_GetSampleCallBack(void) { return 0; }
-
-
-
 
 void MIDI_recv_cb(MIDI_EventPacket_t packet) {
 	//MIDI_send(packet);
