@@ -1,0 +1,3 @@
+[submodule "mcugui"]
+	path = mcugui
+	url = https://github.com/sebseb7/mcugui.git
