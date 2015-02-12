@@ -91,11 +91,18 @@ void LCD_WriteIndex(unsigned short index)
 
 	Clr_Rs;   /* RS low */
 	Set_nRd;  /* RD high */
-	
+
+
+
         /* write data */
 	GPIOE->ODR = index;	 /* GPIO_Write(GPIOE,index); */
 	
 	Clr_nWr;  /* Wr low */
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
 	Set_nWr;  /* Wr high */
 }
 
@@ -117,6 +124,7 @@ void LCD_WriteData(unsigned short data)
 	GPIOE->ODR = data;	 /* GPIO_Write(GPIOE,data); */
 	
 	Clr_nWr;  /* Wr low */ 
+	__ASM volatile ("nop");
 	Set_nWr;  /* Wr high */
 }
 
@@ -193,14 +201,44 @@ void LCD_WriteReg( unsigned short LCD_Reg, unsigned short LCD_RegValue )
 	/* Write 16-bit Index, then Write Reg */
 
 	Clr_Cs;   /* Cs low */ 
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
 
         /* selected LCD register */ 
 	LCD_WriteIndex(LCD_Reg);
       
 	/* Write register data */
 	LCD_WriteData(LCD_RegValue);
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
   
 	Set_Cs;   /* Cs high */
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
 }
 
 /*******************************************************************************
@@ -260,10 +298,34 @@ void LCD_Initializtion(void)
 	LCD_Configuration();
 
 	LCD_ID = LCD_ReadReg(0x0000);		/* read the LCD ID, if Controller is ILI9320, The ID value is 0x9320 */
-	
-	
-	if( LCD_ID == 0x9320 || LCD_ID == 0x9300 )
+
+	printf("id: %i\n",LCD_ID);
+
+/*	while(1)
 	{
+
+		GPIOE->ODR = 0;
+		delay_ms(100);
+		GPIOE->ODR = 1<<1;
+
+		delay_ms(100);
+
+	}
+*/
+
+/*	while(1)
+	{
+		LCD_ID = LCD_ReadReg(0x0000);
+		delay_ms(20);
+	} */
+
+
+//9324
+
+//	if( LCD_ID == 0x9320 || LCD_ID == 0x9300 )
+	{
+		if(0)
+		{
 	    LCD_WriteReg(0x00,0x0000);
 	    LCD_WriteReg(0x01,0x0100);	/* Driver Output Contral */
 	    LCD_WriteReg(0x02,0x0700);	/* LCD Driver Waveform Contral */
@@ -313,37 +375,108 @@ void LCD_Initializtion(void)
 	    LCD_WriteReg(0x98,0x0000);	/* Frame Cycle Contral */
 	    LCD_WriteReg(0x07,0x0173);
 	}
-        else
-        {
-              /* read LCD ID fail, testing terminated */
-              /* fatal error */
-              while(1);
-        }					
-    delay_ms(50);   /* delay 50 ms */		
+
+		static unsigned bt = 6; /* VGL=Vci*4 , VGH=Vci*4 */
+		static unsigned vc = 0b011; /* Vci1=Vci*0.80 */
+		static unsigned vrh = 0b1101; /* VREG1OUT=Vci*1.85 */
+		static unsigned vdv = 0b10010; /* VCOMH amplitude=VREG1OUT*0.98 */
+		static unsigned vcm = 0b001010; /* VCOMH=VREG1OUT*0.735 */
+		
+		bt &= 0b111;
+		vc &= 0b111;
+		vrh &= 0b1111;
+		vdv &= 0b11111;
+		vcm &= 0b111111;
+
+		/* Initialization sequence from ILI9325 Application Notes */
+
+		/* ----------- Start Initial Sequence ----------- */
+//		LCD_WriteReg( 0x00E3, 0x3008); /* Set internal timing */
+//		LCD_WriteReg( 0x00E7, 0x0012); /* Set internal timing */
+//		LCD_WriteReg( 0x00EF, 0x1231); /* Set internal timing */
+		LCD_WriteReg( 0x0001, 0x0100); /* set SS and SM bit */
+		LCD_WriteReg( 0x0002, 0x0700); /* set 1 line inversion */
+		LCD_WriteReg( 0x0004, 0x0000); /* Resize register */
+		LCD_WriteReg( 0x0008, 0x0207); /* set the back porch and front porch */
+		LCD_WriteReg( 0x0009, 0x0000); /* set non-display area refresh cycle */
+		LCD_WriteReg( 0x000A, 0x0000); /* FMARK function */
+		LCD_WriteReg( 0x000C, 0x0000); /* RGB interface setting */
+		LCD_WriteReg( 0x000D, 0x0000); /* Frame marker Position */
+		LCD_WriteReg( 0x000F, 0x0000); /* RGB interface polarity */
+
+		/* ----------- Power On sequence ----------- */
+		LCD_WriteReg( 0x0010, 0x0000); /* SAP, BT[3:0], AP, DSTB, SLP, STB */
+		LCD_WriteReg( 0x0011, 0x0007); /* DC1[2:0], DC0[2:0], VC[2:0] */
+		LCD_WriteReg( 0x0012, 0x0000); /* VREG1OUT voltage */
+		LCD_WriteReg( 0x0013, 0x0000); /* VDV[4:0] for VCOM amplitude */
+		delay_ms(200); /* Dis-charge capacitor power voltage */
+		LCD_WriteReg( 0x0010, /* SAP, BT[3:0], AP, DSTB, SLP, STB */
+				(1 << 12) | (bt << 8) | (1 << 7) | (0b001 << 4));
+		LCD_WriteReg( 0x0011, 0x220 | vc); /* DC1[2:0], DC0[2:0], VC[2:0] */
+		delay_ms(50); /* Delay 50ms */
+		LCD_WriteReg( 0x0012, vrh); /* Internal reference voltage= Vci; */
+		delay_ms(50); /* Delay 50ms */
+		LCD_WriteReg( 0x0013, vdv << 8); /* Set VDV[4:0] for VCOM amplitude */
+		LCD_WriteReg( 0x0029, vcm); /* Set VCM[5:0] for VCOMH */
+		LCD_WriteReg( 0x002B, 0x000C); /* Set Frame Rate */
+		delay_ms(50); /* Delay 50ms */
+		LCD_WriteReg( 0x0020, 0x0000); /* GRAM horizontal Address */
+		LCD_WriteReg( 0x0021, 0x0000); /* GRAM Vertical Address */
+
+		/*------------------ Set GRAM area --------------- */
+		LCD_WriteReg( 0x0050, 0x0000); /* Horizontal GRAM Start Address */
+		LCD_WriteReg( 0x0051, 0x00EF); /* Horizontal GRAM End Address */
+		LCD_WriteReg( 0x0052, 0x0000); /* Vertical GRAM Start Address */
+		LCD_WriteReg( 0x0053, 0x013F); /* Vertical GRAM Start Address */
+		LCD_WriteReg( 0x0060, 0xA700); /* Gate Scan Line */
+		LCD_WriteReg( 0x0061, 0x0001); /* NDL,VLE, REV */
+		LCD_WriteReg( 0x006A, 0x0000); /* set scrolling line */
+
+		/*-------------- Partial Display Control --------- */
+		LCD_WriteReg( 0x0080, 0x0000);
+		LCD_WriteReg( 0x0081, 0x0000);
+		LCD_WriteReg( 0x0082, 0x0000);
+		LCD_WriteReg( 0x0083, 0x0000);
+		LCD_WriteReg( 0x0084, 0x0000);
+		LCD_WriteReg( 0x0085, 0x0000);
+
+		/*-------------- Panel Control ------------------- */
+		LCD_WriteReg( 0x0090, 0x0010);
+		LCD_WriteReg( 0x0092, 0x0600);
+		LCD_WriteReg( 0x0007, 0x0133); /* 262K color and display ON */
+
+	}
+	//        else
+	//        {
+	//            /* read LCD ID fail, testing terminated */
+	//          /* fatal error */
+	//        while(1);
+	// }					
+	delay_ms(50);   /* delay 50 ms */		
 }
 
 /*******************************************************************************
-* Function Name  : LCD_Clear
-* Description    : clear LCD screen
-* Input          : - Color: LCD screen color
-* Output         : None
-* Return         : None
-* Attention	 : None
-*******************************************************************************/
+ * Function Name  : LCD_Clear
+ * Description    : clear LCD screen
+ * Input          : - Color: LCD screen color
+ * Output         : None
+ * Return         : None
+ * Attention	 : None
+ *******************************************************************************/
 void LCD_Clear( unsigned short color )
 {
 	unsigned int index=0;
-	
+
 	LCD_SetCursor(0,0); 
-	
+
 	Clr_Cs;  /* Cs low */
 
-        /* selected LCD register */ 
+	/* selected LCD register */ 
 	LCD_WriteIndex(0x0022);
 
 	for( index = 0; index < MAX_X * MAX_Y; index++ )
 	{
-                /* Write data */
+		/* Write data */
 		LCD_WriteData( color );
 	}
 
@@ -351,66 +484,66 @@ void LCD_Clear( unsigned short color )
 }
 
 /******************************************************************************
-* Function Name  : LCD_BGR2RGB
-* Description    : RRRRRGGGGGGBBBBB change BBBBBGGGGGGRRRRR
-* Input          : - color: BRG color value
-* Output         : None
-* Return         : RGB color value
-* Attention	 : None
-*******************************************************************************/
+ * Function Name  : LCD_BGR2RGB
+ * Description    : RRRRRGGGGGGBBBBB change BBBBBGGGGGGRRRRR
+ * Input          : - color: BRG color value
+ * Output         : None
+ * Return         : RGB color value
+ * Attention	 : None
+ *******************************************************************************/
 unsigned short LCD_BGR2RGB( unsigned short color )
 {
 	unsigned short  r, g, b, rgb;
-	
+
 	b = ( color>>0 )  & 0x1f;
 	g = ( color>>5 )  & 0x3f;
 	r = ( color>>11 ) & 0x1f;
-	
+
 	rgb =  (b<<11) + (g<<5) + (r<<0);
-	
+
 	return( rgb );
 }
 
 /******************************************************************************
-* Function Name  : LCD_GetPoint
-* Description    : Get the color value of the specified coordinates
-* Input          : - Xpos: Row Coordinate
-*                  - Xpos: Line Coordinate 
-* Output         : None
-* Return         : Screen Color
-* Attention	 : None
-*******************************************************************************/
+ * Function Name  : LCD_GetPoint
+ * Description    : Get the color value of the specified coordinates
+ * Input          : - Xpos: Row Coordinate
+ *                  - Xpos: Line Coordinate 
+ * Output         : None
+ * Return         : Screen Color
+ * Attention	 : None
+ *******************************************************************************/
 unsigned short LCD_GetPoint( unsigned short Xpos, unsigned short Ypos )
 {
 	unsigned short dummy;
-	
+
 	LCD_SetCursor(Xpos,Ypos);
 
 	Clr_Cs;   /* Cs low */
 
-        /* selected LCD register */ 
+	/* selected LCD register */ 
 	LCD_WriteIndex(0x0022);  
-	
 
-        dummy = LCD_ReadData();   /* NOP read necessary */
-        dummy = LCD_ReadData();   /* read data */
 
-        Set_Cs;   /* Cs high */
-        
-        /* RRRRRGGGGGGBBBBB change BBBBBGGGGGGRRRRR and return data */
-        return  LCD_BGR2RGB( dummy );
+	dummy = LCD_ReadData();   /* NOP read necessary */
+	dummy = LCD_ReadData();   /* read data */
+
+	Set_Cs;   /* Cs high */
+
+	/* RRRRRGGGGGGBBBBB change BBBBBGGGGGGRRRRR and return data */
+	return  LCD_BGR2RGB( dummy );
 
 }
 
 /******************************************************************************
-* Function Name  : LCD_SetPoint
-* Description    : Draw point at the specified coordinates
-* Input          : - Xpos: Row Coordinate
-*                  - Ypos: Line Coordinate 
-* Output         : None
-* Return         : None
-* Attention		 : None
-*******************************************************************************/
+ * Function Name  : LCD_SetPoint
+ * Description    : Draw point at the specified coordinates
+ * Input          : - Xpos: Row Coordinate
+ *                  - Ypos: Line Coordinate 
+ * Output         : None
+ * Return         : None
+ * Attention		 : None
+ *******************************************************************************/
 void LCD_SetPoint(uint16_t Xpos,uint16_t Ypos,uint16_t point)
 {
 	if( Xpos >= MAX_X || Ypos >= MAX_Y )

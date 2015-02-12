@@ -46,11 +46,41 @@ int main(void) {
 	
 	while (1) {
 		delay_ms(100);
-		//LCD_Clear(0xffff);
+		LCD_Clear(0xffff);
 		STM_EVAL_LEDToggle(LED_Green);
-		delay_ms(100);
-		//LCD_Clear(0x0000);
+		delay_ms(200);
+		LCD_Clear(0x0000);
 		STM_EVAL_LEDToggle(LED_Green);
+	
+	
+		LCD_SetCursor(0,0); 
+
+		Clr_Cs;  /* Cs low */
+
+		/* selected LCD register */ 
+		LCD_WriteIndex(0x0022);
+
+		for( int index = 0; index < 320*80; index++ )
+		{
+			/* Write data */
+			int d = index % 320;
+			LCD_WriteData( d/10 );
+		}
+		for( int index = 0; index < 320*80; index++ )
+		{
+			/* Write data */
+			int d = index % 320;
+			LCD_WriteData( (d/10)<<6 );
+		}
+		for( int index = 0; index < 320*80; index++ )
+		{
+			/* Write data */
+			int d = index % 320;
+			LCD_WriteData( (d/10)<<11 );
+		}
+
+		Set_Cs;  /* Cs high */
+		delay_ms(2000);
 	}
 
 	printf("usb-init\n");
