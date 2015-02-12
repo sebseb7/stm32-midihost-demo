@@ -17,7 +17,7 @@ NAME=st-flash
 
 all: $(NAME)
 
-$(NAME): $(OBJS)
+$(NAME): $(OBJS) ../libstlink/libstlink.a
 	@echo "bulding ${NAME}"
 	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LDFLAGS)
 
@@ -27,5 +27,10 @@ $(NAME): $(OBJS)
 clean:
 	rm -f $(OBJS)
 	rm -f $(NAME)
+	make -C ../libstlink clean
+
+
+../libstlink/libstlink.a:
+	make -C ../libstlink
 
 .PHONY: clean all

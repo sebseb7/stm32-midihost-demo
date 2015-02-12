@@ -18,7 +18,7 @@ CFLAGS+=-Wall -Wextra
 
 LIBRARY=libstlink.a
 
-all:  $(LIBRARY) flash 
+all:  $(LIBRARY) 
 
 $(LIBRARY): $(OBJS_LIB)
 	@echo "objs are $(OBJS_LIB)"
@@ -33,10 +33,7 @@ $(LIBRARY): $(OBJS_LIB)
 clean:
 	rm -rf $(OBJS_LIB)
 	rm -rf $(LIBRARY)
-	$(MAKE) -C flash clean
 	
-flash:
-	@$(MAKE) -C flash
 
 
 .PHONY: clean all flash 

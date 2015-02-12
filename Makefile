@@ -75,10 +75,9 @@ clean:
 	$(REMOVE) .bin/$(PROJECT).bin
 	$(REMOVE) .bin/$(PROJECT).elf
 	$(REMOVE) -r .bin
-#	make -C STM32F$(STM32F)_drivers/build clean
 
 tools/flash/st-flash:
-	make -C tools
+	make -C tools/flash
 
 #########################################################################
 

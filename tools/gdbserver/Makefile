@@ -11,11 +11,16 @@ CFLAGS+=`pkg-config --cflags libusb-1.0`
 
 all: $(PRG)
 
-$(PRG): $(OBJS)
+$(PRG): $(OBJS) ../libstlink/libstlink.a
 	$(CC) -o $@  $^ $(LDFLAGS)
 
 clean:
 	rm -rf $(OBJS)
 	rm -rf $(PRG)
+	make -C ../libstlink clean
+
+
+../libstlink/libstlink.a:
+	make -C ../libstlink
 
 .PHONY: clean all
