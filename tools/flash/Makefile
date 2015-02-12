@@ -2,9 +2,9 @@ CFLAGS+=-g
 CFLAGS+=-DDEBUG
 CFLAGS+=-std=gnu99
 CFLAGS+=-Wall -Wextra
-CFLAGS+=-I../src
+CFLAGS+=-I../libstlink/src
 
-LDFLAGS=-L.. -lstlink
+LDFLAGS=-L../libstlink -lstlink
 
 # libusb location
 LDFLAGS+=`pkg-config --libs libusb-1.0`
@@ -17,7 +17,7 @@ NAME=st-flash
 
 all: $(NAME)
 
-$(NAME): $(OBJS) ../libstlink.a
+$(NAME): $(OBJS)
 	@echo "bulding ${NAME}"
 	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LDFLAGS)
 

@@ -51,7 +51,7 @@ USBH_Usr_cb_TypeDef USR_Callbacks =
  */
 void USBH_USR_Init(void)
 {
-
+	printf("USBH_USR_Init\n");
 }
 
 /**
@@ -62,6 +62,7 @@ void USBH_USR_Init(void)
  */
 void USBH_USR_DeviceAttached(void)
 {
+	printf("USBH_USR_DeviceAttached\n");
 	//LCD_UsrLog ((void*)MSG_DEV_ATTACHED);
 }
 
@@ -70,9 +71,10 @@ void USBH_USR_DeviceAttached(void)
  * @param  None
  * @retval None
  */
-void USBH_USR_UnrecoveredError (void)
+void USBH_USR_UnrecoveredError(void)
 {
-	STM_EVAL_LEDOff(LED_Green);
+	printf("USBH_USR_UnrecoveredError\n");
+
 	//LCD_ErrLog((void*)MSG_UNREC_ERROR);
 }
 
@@ -82,8 +84,9 @@ void USBH_USR_UnrecoveredError (void)
  * @param  None
  * @retval None
  */
-void USBH_USR_DeviceDisconnected (void)
+void USBH_USR_DeviceDisconnected(void)
 {
+	printf("USBH_USR_DeviceDisconnected\n");
 	STM_EVAL_LEDOff(LED_Green);
 }
 
@@ -95,6 +98,7 @@ void USBH_USR_DeviceDisconnected (void)
  */
 void USBH_USR_ResetDevice(void)
 {
+	printf("USBH_USR_ResetDevice\n");
 	/* Users can do their application actions here for the USB-Reset */
 }
 
@@ -107,7 +111,7 @@ void USBH_USR_ResetDevice(void)
  */
 void USBH_USR_DeviceSpeedDetected(__attribute__((unused)) uint8_t DeviceSpeed)
 {
-
+	printf("USBH_USR_DeviceSpeedDetected\n");
 }
 
 /**
@@ -118,7 +122,7 @@ void USBH_USR_DeviceSpeedDetected(__attribute__((unused)) uint8_t DeviceSpeed)
  */
 void USBH_USR_Device_DescAvailable(__attribute__((unused)) void *DeviceDesc)
 {
-
+	printf("USBH_USR_Device_DescAvailable\n");
 }
 
 /**
@@ -129,7 +133,7 @@ void USBH_USR_Device_DescAvailable(__attribute__((unused)) void *DeviceDesc)
  */
 void USBH_USR_DeviceAddressAssigned(void)
 {
-
+	printf("USBH_USR_DeviceAddressAssigned\n");
 }
 
 
@@ -143,7 +147,7 @@ void USBH_USR_Configuration_DescAvailable(__attribute__((unused)) USBH_CfgDesc_T
 		__attribute__((unused)) USBH_InterfaceDesc_TypeDef *itfDesc,
 		__attribute__((unused)) USBH_EpDesc_TypeDef *epDesc)
 {
-
+	printf("USBH_USR_Configuration_DescAvailable\n");
 }
 
 /**
@@ -154,7 +158,7 @@ void USBH_USR_Configuration_DescAvailable(__attribute__((unused)) USBH_CfgDesc_T
  */
 void USBH_USR_Manufacturer_String(__attribute__((unused)) void *ManufacturerString)
 {
-
+	printf("USBH_USR_Manufacturer_String\n");
 }
 
 /**
@@ -165,7 +169,7 @@ void USBH_USR_Manufacturer_String(__attribute__((unused)) void *ManufacturerStri
  */
 void USBH_USR_Product_String(__attribute__((unused)) void *ProductString)
 {
-
+	printf("USBH_USR_Product_String\n");
 }
 
 /**
@@ -176,7 +180,7 @@ void USBH_USR_Product_String(__attribute__((unused)) void *ProductString)
  */
 void USBH_USR_SerialNum_String(__attribute__((unused)) void *SerialNumString)
 {
-
+	printf("USBH_USR_SerialNum_String\n");
 }
 
 /**
@@ -188,7 +192,7 @@ void USBH_USR_SerialNum_String(__attribute__((unused)) void *SerialNumString)
  */
 void USBH_USR_EnumerationDone(void)
 {
-	/* Enumeration complete */
+	printf("USBH_USR_EnumerationDone\n");
 	STM_EVAL_LEDOn(LED_Green);
 }
 
@@ -200,7 +204,9 @@ void USBH_USR_EnumerationDone(void)
  */
 void USBH_USR_DeviceNotSupported(void)
 {
-	STM_EVAL_LEDOff(LED_Green);
+	printf("USBH_USR_DeviceNotSupported\n");
+
+	STM_EVAL_LEDOn(LED_Red);
 }
 
 
@@ -212,6 +218,13 @@ void USBH_USR_DeviceNotSupported(void)
  */
 USBH_USR_Status USBH_USR_UserInput(void)
 {
+	printf("USBH_USR_UserInput\n");
+	static int i = 1;
+	if (i) {
+		i = 0;
+		return 1;
+	}
+	else return 0;
 	return USBH_USR_RESP_OK;
 }
 
@@ -224,6 +237,7 @@ USBH_USR_Status USBH_USR_UserInput(void)
  */
 void USBH_USR_OverCurrentDetected (void)
 {
+	printf("USBH_USR_OverCurrentDetected\n");
 	STM_EVAL_LEDOn(LED_Red);
 }
 /*-----------------------------------------------------------------------------*/
@@ -237,6 +251,7 @@ void USBH_USR_OverCurrentDetected (void)
  */
 void USBH_USR_DeInit(void)
 {
+	printf("USBH_USR_DeInit\n");
 }
 
 
@@ -244,6 +259,7 @@ void USBH_USR_DeInit(void)
 
 int USBH_USR_MIDI_Application(void)
 {
+	printf("USBH_USR_MIDI_Application\n");
 	return (0);
 }
 

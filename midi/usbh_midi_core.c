@@ -82,7 +82,7 @@ USBH_Class_cb_TypeDef  MIDI_cb =
 static struct {
 	MIDI_EventPacket_t event[SEND_BUFFER_SIZE];
 	uint8_t read;
-	uint8_t write; 
+	uint8_t write;
 } send_buffer;
 
 
@@ -94,39 +94,46 @@ static struct {
  * @param  hdev: Selected device property
  * @retval  USBH_Status :Response for USB MIDI driver intialization
  */
-static USBH_Status USBH_MIDI_InterfaceInit ( USB_OTG_CORE_HANDLE *pdev,	void *phost)
+static USBH_Status USBH_MIDI_InterfaceInit(USB_OTG_CORE_HANDLE *pdev, void *phost)
 {
 
 	USBH_HOST *pphost = phost;
-	USBH_Status status = USBH_BUSY ;
+	USBH_Status status = USBH_BUSY;
 	MIDI_Machine.state_out = MIDI_ERROR;
 	MIDI_Machine.state_in = MIDI_ERROR;
 
+	#define INTERFACE 1
 
-	if((pphost->device_prop.Itf_Desc[0].bInterfaceClass == USB_AUDIO_CLASS) && \
-			(pphost->device_prop.Itf_Desc[0].bInterfaceSubClass == USB_MIDISTREAMING_SubCLASS))
+	printf("class %d-%d\n",
+		pphost->device_prop.Itf_Desc[INTERFACE].bInterfaceClass,
+		pphost->device_prop.Itf_Desc[INTERFACE].bInterfaceSubClass);
+
+
+
+	if ((pphost->device_prop.Itf_Desc[INTERFACE].bInterfaceClass == USB_AUDIO_CLASS) && \
+	    (pphost->device_prop.Itf_Desc[INTERFACE].bInterfaceSubClass == USB_MIDISTREAMING_SubCLASS))
 	{
-		if(pphost->device_prop.Ep_Desc[0][0].bEndpointAddress & 0x80)
+		if(pphost->device_prop.Ep_Desc[INTERFACE][0].bEndpointAddress & 0x80)
 		{
-			MIDI_Machine.MIDIBulkInEp = (pphost->device_prop.Ep_Desc[0][0].bEndpointAddress);
-			MIDI_Machine.MIDIBulkInEpSize  = pphost->device_prop.Ep_Desc[0][0].wMaxPacketSize;
+			MIDI_Machine.MIDIBulkInEp = (pphost->device_prop.Ep_Desc[INTERFACE][0].bEndpointAddress);
+			MIDI_Machine.MIDIBulkInEpSize  = pphost->device_prop.Ep_Desc[INTERFACE][0].wMaxPacketSize;
 		}
 		else
 		{
-			MIDI_Machine.MIDIBulkOutEp = (pphost->device_prop.Ep_Desc[0][0].bEndpointAddress);
-			MIDI_Machine.MIDIBulkOutEpSize  = pphost->device_prop.Ep_Desc[0] [0].wMaxPacketSize;
+			MIDI_Machine.MIDIBulkOutEp = (pphost->device_prop.Ep_Desc[INTERFACE][0].bEndpointAddress);
+			MIDI_Machine.MIDIBulkOutEpSize  = pphost->device_prop.Ep_Desc[INTERFACE][0].wMaxPacketSize;
 		}
 
-		if(pphost->device_prop.Ep_Desc[0][1].bEndpointAddress & 0x80)
+		if(pphost->device_prop.Ep_Desc[INTERFACE][1].bEndpointAddress & 0x80)
 
 		{
-			MIDI_Machine.MIDIBulkInEp = (pphost->device_prop.Ep_Desc[0][1].bEndpointAddress);
-			MIDI_Machine.MIDIBulkInEpSize  = pphost->device_prop.Ep_Desc[0][1].wMaxPacketSize;
+			MIDI_Machine.MIDIBulkInEp = (pphost->device_prop.Ep_Desc[INTERFACE][1].bEndpointAddress);
+			MIDI_Machine.MIDIBulkInEpSize  = pphost->device_prop.Ep_Desc[INTERFACE][1].wMaxPacketSize;
 		}
 		else
 		{
-			MIDI_Machine.MIDIBulkOutEp = (pphost->device_prop.Ep_Desc[0][1].bEndpointAddress);
-			MIDI_Machine.MIDIBulkOutEpSize  = pphost->device_prop.Ep_Desc[0][1].wMaxPacketSize;
+			MIDI_Machine.MIDIBulkOutEp = (pphost->device_prop.Ep_Desc[INTERFACE][1].bEndpointAddress);
+			MIDI_Machine.MIDIBulkOutEpSize  = pphost->device_prop.Ep_Desc[INTERFACE][1].wMaxPacketSize;
 		}
 
 		MIDI_Machine.hc_num_out = USBH_Alloc_Channel(pdev,
@@ -280,9 +287,9 @@ static USBH_Status USBH_MIDI_Handle(USB_OTG_CORE_HANDLE *pdev ,
 						packet.status = MIDI_Machine.buff_in[i];
 						packet.data1 = MIDI_Machine.buff_in[i+1];
 						packet.data2 = MIDI_Machine.buff_in[i+2];
-						
+
 						MIDI_recv_cb(packet);
-						
+
 						i+=4;
 					}
 					MIDI_Machine.state_in = MIDI_DATA;
@@ -296,10 +303,9 @@ static USBH_Status USBH_MIDI_Handle(USB_OTG_CORE_HANDLE *pdev ,
 									MIDI_Machine.MIDIBulkInEp,
 									MIDI_Machine.hc_num_in)) == USBH_OK)
 					{
-						/* Change state to issue next IN token */
-						start_LED_On(LED_Blue, 8);
+						// Change state to issue next IN token
 						MIDI_Machine.state_in = MIDI_DATA;
-
+						//STM_EVAL_LEDToggle(LED_Blue);
 					}
 				}
 				break;
@@ -317,10 +323,10 @@ static USBH_Status USBH_MIDI_Handle(USB_OTG_CORE_HANDLE *pdev ,
 				{
 					MIDI_Machine.buff_out[0] = send_buffer.event[send_buffer.read].type;
 					MIDI_Machine.buff_out[1] = send_buffer.event[send_buffer.read].status;
-					MIDI_Machine.buff_out[2] = send_buffer.event[send_buffer.read].data1; 
-					MIDI_Machine.buff_out[3] = send_buffer.event[send_buffer.read].data2; 
+					MIDI_Machine.buff_out[2] = send_buffer.event[send_buffer.read].data1;
+					MIDI_Machine.buff_out[3] = send_buffer.event[send_buffer.read].data2;
 					send_buffer.read = (send_buffer.read+1) & SEND_BUFFER_MASK;
-					
+
 					//printf("send %i %i %i %i\n",MIDI_Machine.buff_out[0],MIDI_Machine.buff_out[1],MIDI_Machine.buff_out[2],MIDI_Machine.buff_out[3]);
 
 					USBH_BulkSendData( &USB_OTG_Core_dev, MIDI_Machine.buff_out, 4, MIDI_Machine.hc_num_out);

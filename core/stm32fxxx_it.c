@@ -203,7 +203,6 @@ void SysTick_Handler(void)
 {
   TimingDelay_Decrement();
   USB_Host_Handle();
-  update_temporized_LED(LED_Blue);
 }
 
 

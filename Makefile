@@ -101,7 +101,6 @@ tools/flash/st-flash:
 #########################################################################
 
 flash: tools/flash/st-flash all
-
-	tools/flash/st-flash --reset write $(PROJECT).bin 0x08000000 
+	tools/flash/st-flash --reset write .bin/$(PROJECT).bin 0x08000000 
 
 .PHONY : clean all flash debug

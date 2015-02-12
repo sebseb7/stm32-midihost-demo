@@ -5,4 +5,5 @@
 *.bin
 *.elf
 *.lst
+*.swp
 tools/flash/st-flash
