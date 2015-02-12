@@ -606,7 +606,7 @@ void Audio_I2S_IRQHandler(void)
   * @param  AudioFreq: Audio frequency used to play the audio stream.
   * @retval 0 if correct communication, else wrong communication
   */
-static uint32_t Codec_Init(uint16_t OutputDevice, uint8_t Volume, uint32_t AudioFreq)
+static uint32_t Codec_Init(__attribute__((unused)) uint16_t OutputDevice, uint8_t Volume, uint32_t AudioFreq)
 {
   uint32_t counter = 0; 
 
@@ -1544,7 +1544,7 @@ void Audio_MAL_Play(uint32_t Addr, uint32_t Size)
   * @param  Addr: Address from/at which the audio stream should resume/pause.
   * @retval None
   */
-static void Audio_MAL_PauseResume(uint32_t Cmd, uint32_t Addr)
+static void Audio_MAL_PauseResume(uint32_t Cmd, __attribute__((unused)) uint32_t Addr)
 {
   /* Pause the audio file playing */
   if (Cmd == AUDIO_PAUSE)

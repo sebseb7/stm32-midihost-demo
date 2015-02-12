@@ -175,11 +175,11 @@ void init_audio(void) {
 */
 
 }
-void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
+void EVAL_AUDIO_HalfTransfer_CallBack(__attribute__((unused)) uint32_t pBuffer, __attribute__((unused)) uint32_t Size) {
 	GPIO_SetBits(GPIOD, GPIO_Pin_15);
 	fill_audio_buffer(0, BUFFER_SIZE/2);
 }
-void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
+void EVAL_AUDIO_TransferComplete_CallBack(__attribute__((unused)) uint32_t pBuffer, __attribute__((unused)) uint32_t Size) {
 	GPIO_ResetBits(GPIOD, GPIO_Pin_15);
 	fill_audio_buffer(BUFFER_SIZE/2, BUFFER_SIZE/2);
 }
