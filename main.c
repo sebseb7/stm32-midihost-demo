@@ -6,15 +6,14 @@ __ALIGN_BEGIN USBH_HOST					USB_Host __ALIGN_END;
 
 
 static __IO uint32_t TimingDelay;
+
 void delay_ms(__IO uint32_t nTime) {
-	TimingDelay = nTime*10;
-	while(TimingDelay != 0);
+	TimingDelay = nTime * 10;
+	while (TimingDelay != 0) {}
 }
 
 void TimingDelay_Decrement(void) {
-	if (TimingDelay != 0x00) {
-		TimingDelay--;
-	}
+	if (TimingDelay > 0) TimingDelay--;
 }
 
 static uint16_t usb_ready = 0;
@@ -49,6 +48,7 @@ int main(void) {
 			&USR_Callbacks);
 	printf("usb-init done\n");
 
+
 	init_audio();
 
 	usb_ready = 1;
@@ -80,52 +80,83 @@ enum {
 	MIXRATE = I2S_AudioFreq_48k
 };
 
+enum { RELEASE, ATTACK, HOLD, };
+
 typedef struct {
-	float phase;
-	float speed;
-	float pulsewidth;
-
+	uint8_t	note;
+	uint8_t	state;
+	float	level;
+	float	phase;
+	float	speed;
+	float	pulsewidth;
 } Channel;
-
 
 Channel chan = {
 	0,
+	ATTACK,
+	0,
+	0,
 	440.0 / MIXRATE,
-	0.3
+	0.5
 };
 
 void mix(float frame[2]) {
-	chan.pulsewidth += 0.00001;
-	chan.pulsewidth -= (int) chan.pulsewidth;
 
+	// pwm
+	//chan.pulsewidth += 0.00001;
+	//chan.pulsewidth -= (int) chan.pulsewidth;
 
+	// osc
 	chan.phase += chan.speed;
 	chan.phase -= (int) chan.phase;
-
 	float amp = chan.phase < chan.pulsewidth ? -1 : 1;
+
+
+	// env
+	float attack	= 0.005;
+	float sustain	= 0.7;
+	float decay		= 0.9999;
+	float release	= 0.9998;
+
+	switch (chan.state) {
+	case ATTACK:
+		chan.level += attack;
+		if (chan.level > 1) {
+			chan.level = 1;
+			chan.state = HOLD;
+		}
+		break;
+	case HOLD:
+		chan.level = sustain + (chan.level - sustain) * decay;
+		break;
+	case RELEASE:
+	default:
+		chan.level *= release;
+		break;
+	}
+
+	amp *= chan.level;
 
 	frame[0] = amp;
 	frame[1] = amp;
-
 }
 
 
 
-uint16_t audio_buffer[BUFFER_SIZE] = {0};
+uint16_t audio_buffer[BUFFER_SIZE] = {};
 static void fill_audio_buffer(uint16_t offset, uint16_t length) {
 	float frame[2];
 	for (int i = 0; i < length; i += 2) {
 		mix(frame);
-		audio_buffer[offset + i + 0] = frame[0] * 0x3000 + 0x8000;
-		audio_buffer[offset + i + 1] = frame[1] * 0x3000 + 0x8000;
+		audio_buffer[offset + i + 0] = (uint16_t)((int16_t)(20000.0 * frame[0]));
+		audio_buffer[offset + i + 1] = (uint16_t)((int16_t)(20000.0 * frame[1]));
 	}
 }
 
 
 void init_audio(void) {
 	EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
-//	EVAL_AUDIO_Init(OUTPUT_DEVICE_AUTO, 70, MIXRATE);
-	EVAL_AUDIO_Init(OUTPUT_DEVICE_AUTO, 60, MIXRATE);
+	EVAL_AUDIO_Init(OUTPUT_DEVICE_AUTO, 70, MIXRATE);
 	EVAL_AUDIO_Play(audio_buffer, BUFFER_SIZE);
 }
 
@@ -143,8 +174,16 @@ uint16_t EVAL_AUDIO_GetSampleCallBack(void) { return 0; }
 void MIDI_recv_cb(MIDI_EventPacket_t packet) {
 	//MIDI_send(packet);
 	STM_EVAL_LEDToggle(LED_Orange);
-	chan.speed = 440.0 / MIXRATE * powf(2, (packet.note - 69) / 12.0);
 
+	if (packet.type == NoteOn) {
+		chan.state = ATTACK;
+		chan.level = 0;
+		chan.note = packet.data1;
+		chan.speed = (440.0 / MIXRATE) * powf(2, (chan.note  - 69) * (1 / 12.0));
+	}
+	if (packet.type == NoteOff && packet.data1 == chan.note) {
+		chan.state = RELEASE;
+	}
 }
 
 

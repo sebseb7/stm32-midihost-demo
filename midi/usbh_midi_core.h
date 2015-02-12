@@ -1,21 +1,5 @@
-/**
- ******************************************************************************
- * @file    usbh_midi_core.h
- * @author	Xavier Halgand
- * @version
- * @date
- * @brief   This file contains all the prototypes for the usbh_midi_core.c
- ******************************************************************************
- *
- *
- ******************************************************************************
- */
+#pragma once
 
-/* Define to prevent recursive  ----------------------------------------------*/
-#ifndef __USBH_MIDI_CORE_H
-#define __USBH_MIDI_CORE_H
-
-/* Includes ------------------------------------------------------------------*/
 #include "usbh_core.h"
 #include "usbh_stdreq.h"
 #include "usb_bsp.h"
@@ -23,8 +7,6 @@
 #include "usbh_hcs.h"
 #include "usbh_usr.h"
 
-/******************************************************************************/
-/* States for MIDI State Machine */
 typedef enum
 {
 	MIDI_DATA=0,
@@ -33,8 +15,6 @@ typedef enum
 }
 MIDI_State_t;
 
-/******************************************************************************/
-/* Structure for MIDI process */
 typedef struct _MIDI_Process
 {
 	MIDI_State_t	state_out;
@@ -50,8 +30,6 @@ typedef struct _MIDI_Process
 }
 MIDI_Machine_t;
 
-
-// http://www.midi.org/techspecs/midimessages.php
 
 typedef enum {
 	NoteOff       = 0x8,
@@ -73,16 +51,8 @@ typedef union {
 				uint8_t type:4;
 			};
 		};
-		union {
-			uint8_t data1;
-			uint8_t note;
-			uint8_t cc;
-		};
-		union {
-			uint8_t data2;
-			uint8_t velocity;
-			uint8_t value;
-		};
+		uint8_t data1;
+		uint8_t data2;
 	};
 } MIDI_EventPacket_t;
 
@@ -90,8 +60,4 @@ extern USBH_Class_cb_TypeDef  MIDI_cb;
 
 int MIDI_send(MIDI_EventPacket_t packet);
 void MIDI_recv_cb(MIDI_EventPacket_t packet);
-
-
-#endif /* __USBH_MIDI_CORE_H */
-
 
