@@ -73,6 +73,8 @@ void sync_frame(void)
 		/* selected LCD register */ 
 		LCD_WriteIndex(0x0022);
 
+	
+		Set_Rs;  /* RS high */
 		
 		
 		for(int y = 0; y < LCD_PIXEL_HEIGHT; y++) 
@@ -84,15 +86,46 @@ void sync_frame(void)
 				
 				if(y < (LCD_HEIGHT-100))
 				{
-					LCD_WriteData( leds[y][x] );
+					GPIOE->ODR = leds[y][x];
 				}
 				else
 				{
-					LCD_WriteData( leds_a[y-140][x] );
+					GPIOE->ODR = leds_a[y-140][x];
 				}
-	
+
+				Clr_nWr;
+				//__ASM volatile ("nop");
+				Set_nWr; 
 			}
 		}
 		Set_Cs;
+}
+
+void testimage(void)
+{
+		LCD_SetCursor(0,0); 
+
+		Clr_Cs;  /* Cs low */
+
+		/* selected LCD register */ 
+		LCD_WriteIndex(0x0022);
+
+		for( int index = 0; index < 320*80; index++ )
+		{
+			int d = index % 320;
+			LCD_WriteData( d/10 );
+		}
+		for( int index = 0; index < 320*80; index++ )
+		{
+			int d = index % 320;
+			LCD_WriteData( (d/5)<<5 );
+		}
+		for( int index = 0; index < 320*80; index++ )
+		{
+			int d = index % 320;
+			LCD_WriteData( (d/10)<<11 );
+		}
+
+		Set_Cs; 
 }
 

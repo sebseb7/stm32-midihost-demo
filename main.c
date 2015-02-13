@@ -49,7 +49,6 @@ int main(void) {
 
 	LCD_Initializtion();
 	
-
 	printf("usb-init\n");
 	USBH_Init(&USB_OTG_Core_dev,
 			USB_OTG_FS_CORE_ID,
@@ -62,11 +61,7 @@ int main(void) {
 	init_audio();
 
 	usb_ready = 1;
-	
-	while (1) {
-		draw_filledRect(randr(0,320),randr(0,240),randr(50,100),randr(50,100),randr(0,255),randr(0,255),randr(0,255));
-		sync_frame();
-	}
+
 
 	while (1) {
 		draw_filledRect(randr(0,320),randr(0,240),randr(50,100),randr(50,100),randr(0,255),randr(0,255),randr(0,255));

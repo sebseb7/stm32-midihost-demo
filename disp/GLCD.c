@@ -301,80 +301,10 @@ void LCD_Initializtion(void)
 
 	printf("id: %i\n",LCD_ID);
 
-/*	while(1)
-	{
-
-		GPIOE->ODR = 0;
-		delay_ms(100);
-		GPIOE->ODR = 1<<1;
-
-		delay_ms(100);
-
-	}
-*/
-
-/*	while(1)
-	{
-		LCD_ID = LCD_ReadReg(0x0000);
-		delay_ms(20);
-	} */
-
-
 //9324
 
 //	if( LCD_ID == 0x9320 || LCD_ID == 0x9300 )
 	{
-		if(0)
-		{
-	    LCD_WriteReg(0x00,0x0000);
-	    LCD_WriteReg(0x01,0x0100);	/* Driver Output Contral */
-	    LCD_WriteReg(0x02,0x0700);	/* LCD Driver Waveform Contral */
-	    LCD_WriteReg(0x03,0x1018);	/* Entry Mode Set */
-		
-	    LCD_WriteReg(0x04,0x0000);	/* Scalling Contral */
-	    LCD_WriteReg(0x08,0x0202);	/* Display Contral */
-	    LCD_WriteReg(0x09,0x0000);	/* Display Contral 3.(0x0000) */
-	    LCD_WriteReg(0x0a,0x0000);	/* Frame Cycle Contal.(0x0000) */
-	    LCD_WriteReg(0x0c,(1<<0));	/* Extern Display Interface Contral */
-	    LCD_WriteReg(0x0d,0x0000);	/* Frame Maker Position */
-	    LCD_WriteReg(0x0f,0x0000);	/* Extern Display Interface Contral 2. */
-		
-	    delay_ms(100);  /* delay 100 ms */		
-	    LCD_WriteReg(0x07,0x0101);	/* Display Contral */
-	    delay_ms(100);  /* delay 100 ms */		
-	
-	    LCD_WriteReg(0x10,(1<<12)|(0<<8)|(1<<7)|(1<<6)|(0<<4));	/* Power Control 1.(0x16b0)	*/
-	    LCD_WriteReg(0x11,0x0007);								/* Power Control 2 */
-	    LCD_WriteReg(0x12,(1<<8)|(1<<4)|(0<<0));				/* Power Control 3.(0x0138)	*/
-	    LCD_WriteReg(0x13,0x0b00);								/* Power Control 4 */
-	    LCD_WriteReg(0x29,0x0000);								/* Power Control 7 */
-		
-	    LCD_WriteReg(0x2b,(1<<14)|(1<<4));
-			
-	    LCD_WriteReg(0x50,0);       /* Set X Start */
-	    LCD_WriteReg(0x51,239);	    /* Set X End */
-	    LCD_WriteReg(0x52,0);	    /* Set Y Start */
-	    LCD_WriteReg(0x53,319);	    /* Set Y End */
-		
-	    LCD_WriteReg(0x60,0x2700);	/* Driver Output Control */
-	    LCD_WriteReg(0x61,0x0001);	/* Driver Output Control */
-	    LCD_WriteReg(0x6a,0x0000);	/* Vertical Srcoll Control */
-		
-	    LCD_WriteReg(0x80,0x0000);	/* Display Position? Partial Display 1 */
-	    LCD_WriteReg(0x81,0x0000);	/* RAM Address Start? Partial Display 1 */
-	    LCD_WriteReg(0x82,0x0000);	/* RAM Address End-Partial Display 1 */
-	    LCD_WriteReg(0x83,0x0000);	/* Displsy Position? Partial Display 2 */
-	    LCD_WriteReg(0x84,0x0000);	/* RAM Address Start? Partial Display 2 */
-	    LCD_WriteReg(0x85,0x0000);	/* RAM Address End? Partial Display 2 */
-		
-	    LCD_WriteReg(0x90,(0<<7)|(16<<0));	/* Frame Cycle Contral.(0x0013)	*/
-	    LCD_WriteReg(0x92,0x0000);	/* Panel Interface Contral 2.(0x0000) */
-	    LCD_WriteReg(0x93,0x0001);	/* Panel Interface Contral 3. */
-	    LCD_WriteReg(0x95,0x0110);	/* Frame Cycle Contral.(0x0110)	*/
-	    LCD_WriteReg(0x97,(0<<8));	
-	    LCD_WriteReg(0x98,0x0000);	/* Frame Cycle Contral */
-	    LCD_WriteReg(0x07,0x0173);
-	}
 
 		static unsigned bt = 6; /* VGL=Vci*4 , VGH=Vci*4 */
 		static unsigned vc = 0b101; /* Vci1=Vci*0.80 */
@@ -388,12 +318,10 @@ void LCD_Initializtion(void)
 		vdv &= 0b11111;
 		vcm &= 0b111111;
 
-		/* Initialization sequence from ILI9325 Application Notes */
-
-		/* ----------- Start Initial Sequence ----------- */
 //		LCD_WriteReg( 0x00E3, 0x3008); /* Set internal timing */
 //		LCD_WriteReg( 0x00E7, 0x0012); /* Set internal timing */
 //		LCD_WriteReg( 0x00EF, 0x1231); /* Set internal timing */
+
 		LCD_WriteReg( 0x0001, 0x0100); /* set SS and SM bit */
 		LCD_WriteReg( 0x0002, 0x0700); /* set 1 line inversion */
 		LCD_WriteReg( 0x0004, 0x0000); /* Resize register */
@@ -409,6 +337,7 @@ void LCD_Initializtion(void)
 		LCD_WriteReg( 0x0011, 0x0007); /* DC1[2:0], DC0[2:0], VC[2:0] */
 		LCD_WriteReg( 0x0012, 0x0000); /* VREG1OUT voltage */
 		LCD_WriteReg( 0x0013, 0x0000); /* VDV[4:0] for VCOM amplitude */
+	//	LCD_WriteReg(0x07, 0x0001); 
 		delay_ms(200); /* Dis-charge capacitor power voltage */
 		LCD_WriteReg( 0x0010, /* SAP, BT[3:0], AP, DSTB, SLP, STB */
 				(1 << 12) | (bt << 8) | (1 << 7) | (0b001 << 4));
@@ -431,6 +360,17 @@ void LCD_Initializtion(void)
 		LCD_WriteReg( 0x0060, 0xA700); /* Gate Scan Line */
 		LCD_WriteReg( 0x0061, 0x0001); /* NDL,VLE, REV */
 		LCD_WriteReg( 0x006A, 0x0000); /* set scrolling line */
+	
+/*		LCD_WriteReg(0x30, 0x0000);  
+		LCD_WriteReg(0x31, 0x0707);  
+		LCD_WriteReg(0x32, 0x0307);  
+		LCD_WriteReg(0x35, 0x0200);  
+		LCD_WriteReg(0x36, 0x0008);  
+		LCD_WriteReg(0x37, 0x0004);  
+		LCD_WriteReg(0x38, 0x0000);  
+		LCD_WriteReg(0x39, 0x0707);  
+		LCD_WriteReg(0x3C, 0x0002);  
+		LCD_WriteReg(0x3D, 0x1D04);  */
 
 		/*-------------- Partial Display Control --------- */
 		LCD_WriteReg( 0x0080, 0x0000);
@@ -444,14 +384,7 @@ void LCD_Initializtion(void)
 		LCD_WriteReg( 0x0090, 0x0010);
 		LCD_WriteReg( 0x0092, 0x0600);
 		LCD_WriteReg( 0x0007, 0x0133); /* 262K color and display ON */
-
 	}
-	//        else
-	//        {
-	//            /* read LCD ID fail, testing terminated */
-	//          /* fatal error */
-	//        while(1);
-	// }					
 	delay_ms(50);   /* delay 50 ms */		
 }
 
