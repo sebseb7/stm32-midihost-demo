@@ -125,6 +125,8 @@ void LCD_WriteData(unsigned short data)
 	
 	Clr_nWr;  /* Wr low */ 
 	__ASM volatile ("nop");
+	__ASM volatile ("nop");
+	__ASM volatile ("nop");
 	Set_nWr;  /* Wr high */
 }
 
@@ -305,25 +307,23 @@ void LCD_Initializtion(void)
 
 //	if( LCD_ID == 0x9320 || LCD_ID == 0x9300 )
 	{
+		LCD_SetCursor(0,0); 
 
-		static unsigned bt = 6; /* VGL=Vci*4 , VGH=Vci*4 */
-		static unsigned vc = 0b101; /* Vci1=Vci*0.80 */
-		static unsigned vrh = 0b1101; /* VREG1OUT=Vci*1.85 */
-		static unsigned vdv = 0b01000; /* VCOMH amplitude=VREG1OUT*0.98 */ //aendert farbkontrast, bei niedrigen wert sehen volle farben gut aus.
-		static unsigned vcm = 0b001010; /* VCOMH=VREG1OUT*0.735 */
-		
-		bt &= 0b111;
-		vc &= 0b111;
-		vrh &= 0b1111;
-		vdv &= 0b11111;
-		vcm &= 0b111111;
+		Clr_Cs;  /* Cs low */
 
-//		LCD_WriteReg( 0x00E3, 0x3008); /* Set internal timing */
-//		LCD_WriteReg( 0x00E7, 0x0012); /* Set internal timing */
-//		LCD_WriteReg( 0x00EF, 0x1231); /* Set internal timing */
+		/* selected LCD register */ 
+		LCD_WriteIndex(0x0022);
+
+		for( int index = 0; index < 320*240; index++ )
+		{
+			LCD_WriteData( 0 );
+		}
+
+		Set_Cs; 
 
 		LCD_WriteReg( 0x0001, 0x0100); /* set SS and SM bit */
 		LCD_WriteReg( 0x0002, 0x0700); /* set 1 line inversion */
+		LCD_WriteReg( 0x0003, 0x1028); /* RGB inversion */
 		LCD_WriteReg( 0x0004, 0x0000); /* Resize register */
 		LCD_WriteReg( 0x0008, 0x0207); /* set the back porch and front porch */
 		LCD_WriteReg( 0x0009, 0x0000); /* set non-display area refresh cycle */
@@ -337,18 +337,15 @@ void LCD_Initializtion(void)
 		LCD_WriteReg( 0x0011, 0x0007); /* DC1[2:0], DC0[2:0], VC[2:0] */
 		LCD_WriteReg( 0x0012, 0x0000); /* VREG1OUT voltage */
 		LCD_WriteReg( 0x0013, 0x0000); /* VDV[4:0] for VCOM amplitude */
-	//	LCD_WriteReg(0x07, 0x0001); 
-		delay_ms(200); /* Dis-charge capacitor power voltage */
-		LCD_WriteReg( 0x0010, /* SAP, BT[3:0], AP, DSTB, SLP, STB */
-				(1 << 12) | (bt << 8) | (1 << 7) | (0b001 << 4));
-		LCD_WriteReg( 0x0011, 0x0220 | vc); /* DC1[2:0], DC0[2:0], VC[2:0] */
+		delay_ms(100); /* Dis-charge capacitor power voltage */
+		LCD_WriteReg( 0x0010, 0x14b0);
+		delay_ms(50);
+		LCD_WriteReg( 0x0011, 0x0007); /* DC1[2:0], DC0[2:0], VC[2:0] */
 		delay_ms(50); /* Delay 50ms */
-		LCD_WriteReg( 0x0012, vrh); /* Internal reference voltage= Vci; */
+		LCD_WriteReg( 0x0012, 0x005e); /* Internal reference voltage= Vci; */
+		LCD_WriteReg( 0x0029, 0x0015); /* Set VCM[5:0] for VCOMH */
 		delay_ms(50); /* Delay 50ms */
-		LCD_WriteReg( 0x0013, vdv << 8); /* Set VDV[4:0] for VCOM amplitude */
-		LCD_WriteReg( 0x0029, vcm); /* Set VCM[5:0] for VCOMH */
 		LCD_WriteReg( 0x002B, 0x000e); /* Set Frame Rate */ // 5 flickers but should not: 40fps
-		delay_ms(50); /* Delay 50ms */
 		LCD_WriteReg( 0x0020, 0x0000); /* GRAM horizontal Address */
 		LCD_WriteReg( 0x0021, 0x0000); /* GRAM Vertical Address */
 
@@ -361,16 +358,16 @@ void LCD_Initializtion(void)
 		LCD_WriteReg( 0x0061, 0x0001); /* NDL,VLE, REV */
 		LCD_WriteReg( 0x006A, 0x0000); /* set scrolling line */
 	
-/*		LCD_WriteReg(0x30, 0x0000);  
-		LCD_WriteReg(0x31, 0x0707);  
-		LCD_WriteReg(0x32, 0x0307);  
-		LCD_WriteReg(0x35, 0x0200);  
-		LCD_WriteReg(0x36, 0x0008);  
-		LCD_WriteReg(0x37, 0x0004);  
-		LCD_WriteReg(0x38, 0x0000);  
-		LCD_WriteReg(0x39, 0x0707);  
-		LCD_WriteReg(0x3C, 0x0002);  
-		LCD_WriteReg(0x3D, 0x1D04);  */
+		LCD_WriteReg(0x30, 0x0000);  
+		LCD_WriteReg(0x31, 0x0107);  
+		LCD_WriteReg(0x32, 0x0000);  
+		LCD_WriteReg(0x35, 0x0203);  
+		LCD_WriteReg(0x36, 0x0402);  
+		LCD_WriteReg(0x37, 0x0000);  
+		LCD_WriteReg(0x38, 0x0207);  
+		LCD_WriteReg(0x39, 0x0000);  
+		LCD_WriteReg(0x3C, 0x0203);  
+		LCD_WriteReg(0x3D, 0x0403);  
 
 		/*-------------- Partial Display Control --------- */
 		LCD_WriteReg( 0x0080, 0x0000);
@@ -381,7 +378,7 @@ void LCD_Initializtion(void)
 		LCD_WriteReg( 0x0085, 0x0000);
 
 		/*-------------- Panel Control ------------------- */
-		LCD_WriteReg( 0x0090, 0x0010);
+		LCD_WriteReg( 0x0090, 0x0029);//was 0001
 		LCD_WriteReg( 0x0092, 0x0600);
 		LCD_WriteReg( 0x0007, 0x0133); /* 262K color and display ON */
 	}
